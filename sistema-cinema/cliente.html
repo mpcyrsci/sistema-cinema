@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- ===== METADADOS E CONFIGURAÇÕES ===== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 Catálogo de Filmes - Sistema de Cinema</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="fade-in">
+    <!-- ===== CONTAINER PRINCIPAL ===== -->
+    <div class="container">
+        
+        <!-- ===== CABEÇALHO DA PÁGINA ===== -->
+        <div class="navigation-buttons">
+            <h1 class="page-title" data-page="cliente">🎭 Catálogo de Filmes</h1>
+            <button onclick="logout()" class="nav-btn logout">Sair do Sistema</button>
+        </div>
+
+        <!-- ===== MENSAGEM DE BOAS-VINDAS ===== -->
+        <div class="welcome-message">
+            <h2>🎉 Bem-vindo ao nosso catálogo!</h2>
+            <p>Confira abaixo todos os filmes disponíveis em nossa programação.</p>
+        </div>
+
+        <!-- ===== GRADE DE FILMES ===== -->
+        <div class="catalogo" id="catalogo">
+            <!-- ===== ÁREA DINÂMICA ===== -->
+            <!-- Os cards de filmes serão carregados aqui via JavaScript -->
+        </div>
+
+        <!-- ===== MENSAGEM DE ESTADO VAZIO ===== -->
+        <!-- Será exibida via JavaScript quando não houver filmes -->
+    </div>
+
+    <!-- ===== SCRIPTS DO SISTEMA ===== -->
+    <script src="script.js"></script>
+</body>
+</html>

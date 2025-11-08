@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- ===== METADADOS E CONFIGURAÇÕES ===== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Sistema de Cinema - Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="fade-in">
+    <!-- ===== CONTAINER PRINCIPAL DE LOGIN ===== -->
+    <main class="login-container">
+        
+        <!-- ===== CABEÇALHO DO SISTEMA ===== -->
+        <h1>🎬 Sistema de Cinema</h1>
+
+        <!-- ===== FORMULÁRIO DE LOGIN ===== -->
+        <div id="loginForm">
+            <h2>🔐 Faça o login</h2>
+            
+            <!-- Campo de E-mail -->
+            <input type="email" id="loginEmail" placeholder="📧 Digite seu e-mail" required>
+            
+            <!-- Campo de Senha -->
+            <input type="password" id="loginSenha" placeholder="🔒 Digite sua senha" required>
+            
+            <!-- Botão de Entrar -->
+            <button onclick="login()">Entrar no Sistema</button>
+
+            <!-- Link para Cadastro -->
+            <p>📝 Não tem conta? 
+                <a href="#" onclick="toggleCadastro()">Cadastre-se aqui</a>
+            </p>
+        </div>
+
+        <!-- ===== FORMULÁRIO DE CADASTRO ===== -->
+        <div id="cadastroForm" class="hidden">
+            <h2>👤 Criar Nova Conta</h2>
+            
+            <!-- Campo de Nome -->
+            <input type="text" id="cadastroNome" placeholder="👤 Digite seu nome completo" required>
+            
+            <!-- Campo de E-mail -->
+            <input type="email" id="cadastroEmail" placeholder="📧 Digite seu e-mail" required>
+            
+            <!-- Campo de Senha -->
+            <input type="password" id="cadastroSenha" placeholder="🔒 Crie uma senha" required>
+            
+            <!-- Botão de Cadastrar -->
+            <button onclick="cadastrar()">✅ Finalizar Cadastro</button>
+
+            <!-- Link para Login -->
+            <p>🔐 Já tem conta? 
+                <a href="#" onclick="toggleCadastro()">Faça login aqui</a>
+            </p>
+        </div>
+    </main>
+
+    <!-- ===== SCRIPTS DO SISTEMA ===== -->
+    <script src="script.js"></script>
+</body>
+</html>

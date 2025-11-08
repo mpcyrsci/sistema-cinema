@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- ===== METADADOS E CONFIGURAÇÕES ===== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👤 Cadastrar Usuário - Sistema de Cinema</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="fade-in">
+    <!-- ===== CONTAINER PRINCIPAL ===== -->
+    <div class="container">
+        
+        <!-- ===== CABEÇALHO DE NAVEGAÇÃO ===== -->
+        <div class="navigation-buttons">
+            <!-- Título da Página -->
+            <h2 class="page-title" data-page="add-usuario">Cadastrar Usuário</h2>
+            
+            <!-- Botões de Navegação (Direita) -->
+            <div class="nav-buttons-right">
+                <button id="backToAdminBtn" class="nav-btn back-btn">⬅️ Voltar</button>
+                <button id="logoutBtn" class="nav-btn logout">Sair do Sistema</button>
+            </div>
+        </div>
+
+        <!-- ===== FORMULÁRIO DE USUÁRIO ===== -->
+        <form id="addUserForm">
+            
+            <!-- ===== SEÇÃO: DADOS PESSOAIS ===== -->
+            <label for="name">👤 Nome Completo</label>
+            <input type="text" id="name" placeholder="Digite o nome completo do usuário" required>
+
+            <label for="email">📧 E-mail</label>
+            <input type="email" id="email" placeholder="Digite o e-mail do usuário" required>
+
+            <label for="password">🔒 Senha de Acesso</label>
+            <input type="password" id="password" placeholder="Crie uma senha para o usuário" required>
+
+            <!-- ===== SEÇÃO: DOCUMENTOS ===== -->
+            <label for="cpf">🆔 CPF</label>
+            <input type="text" id="cpf" placeholder="Digite o CPF (apenas números)" required>
+
+            <!-- ===== SEÇÃO: INFORMAÇÕES ADICIONAIS ===== -->
+            <label for="birthdate">📅 Data de Nascimento</label>
+            <input type="date" id="birthdate" required>
+
+            <!-- ===== SEÇÃO: CONFIGURAÇÕES DE ACESSO ===== -->
+            <label for="role">🎭 Perfil de Acesso</label>
+            <select id="role" required>
+                <option value="Cliente">🎫 Cliente - Acesso ao catálogo de filmes</option>
+                <option value="Funcionário">👨‍💼 Funcionário - Acesso administrativo limitado</option>
+                <option value="Administrador">⚙️ Administrador - Acesso total ao sistema</option>
+            </select>
+
+            <label for="status">📈 Status da Conta</label>
+            <select id="status" required>
+                <option value="Ativo">✅ Ativo - Conta habilitada para uso</option>
+                <option value="Inativo">⏸️ Inativo - Conta temporariamente desabilitada</option>
+            </select>
+
+            <!-- ===== BOTÕES DE AÇÃO DO FORMULÁRIO ===== -->
+            <div class="form-buttons">
+                <button type="submit" id="submitBtn">✅ Cadastrar Usuário</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ===== SCRIPTS DO SISTEMA ===== -->
+    <script src="script.js"></script>
+</body>
+</html>

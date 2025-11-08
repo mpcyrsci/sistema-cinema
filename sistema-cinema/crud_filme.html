@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- ===== METADADOS E CONFIGURAÇÕES ===== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 Gerenciar Filmes - Sistema de Cinema</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="fade-in">
+    <!-- ===== CONTAINER PRINCIPAL ===== -->
+    <div class="container">
+        
+        <!-- ===== CABEÇALHO DE NAVEGAÇÃO ===== -->
+        <div class="navigation-buttons">
+            <!-- Botão de Ação Principal -->
+            <button id="addMovieBtn" class="nav-btn">🎭 Adicionar Novo Filme</button>
+            
+            <!-- Botões de Navegação (Direita) -->
+            <div class="nav-buttons-right">
+                <button id="backToAdminBtn" class="nav-btn back-btn">⬅️ Voltar ao Painel</button>
+                <button id="logoutBtn" class="nav-btn logout">Sair do Sistema</button>
+            </div>
+        </div>
+
+        <!-- ===== TÍTULO DA PÁGINA ===== -->
+        <h2 class="page-title" data-page="filmes">Gerenciar Filmes</h2>
+
+        <!-- ===== BARRA DE PESQUISA ===== -->
+        <input type="text" id="searchInput" 
+               placeholder="🔍 Pesquisar por título, gênero, classificação ou data de estreia..." 
+               class="search-box">
+
+        <!-- ===== TABELA DE FILMES ===== -->
+        <table id="movieTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Título</th>
+                    <th>Gênero</th>
+                    <th>Duração (min)</th>
+                    <th>Classificação</th>
+                    <th>Sinopse</th>
+                    <th>Data de Estreia</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- ===== ÁREA DINÂMICA ===== -->
+                <!-- Os filmes serão carregados aqui via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ===== SCRIPTS DO SISTEMA ===== -->
+    <script src="script.js"></script>
+</body>
+</html>

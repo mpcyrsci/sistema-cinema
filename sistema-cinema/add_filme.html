@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- ===== METADADOS E CONFIGURAÇÕES ===== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Cadastrar Filme - Sistema de Cinema</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="fade-in">
+    <!-- ===== CONTAINER PRINCIPAL ===== -->
+    <div class="container">
+        
+        <!-- ===== CABEÇALHO DE NAVEGAÇÃO ===== -->
+        <div class="navigation-buttons">
+            <!-- Título da Página -->
+            <h2 class="page-title" data-page="add-filme">Cadastrar Filmes</h2>
+            
+            <!-- Botões de Navegação (Direita) -->
+            <div class="nav-buttons-right">
+                <button id="backToAdminBtn" class="nav-btn back-btn">⬅️ Voltar</button>
+                <button id="logoutBtn" class="nav-btn logout">Sair do Sistema</button>
+            </div>
+        </div>
+
+        <!-- ===== FORMULÁRIO DE FILME ===== -->
+        <form id="formFilmes">
+            
+            <!-- ===== SEÇÃO: INFORMAÇÕES BÁSICAS ===== -->
+            <label for="tituloFilme">🎭 Título do Filme</label>
+            <input type="text" id="tituloFilme" placeholder="Digite o título completo do filme" required>
+
+            <!-- ===== SEÇÃO: GÊNEROS ===== -->
+            <label>🏷️ Gêneros do Filme</label>
+            <div class="genero-container" id="generoContainer">
+                <!-- ===== ÁREA DINÂMICA ===== -->
+                <!-- Os botões de gênero serão criados via JavaScript -->
+            </div>
+            <input type="hidden" id="generoFilme" name="generoFilme" required>
+
+            <!-- ===== SEÇÃO: INFORMAÇÕES TÉCNICAS ===== -->
+            <label for="duracaoFilme">⏱️ Duração (minutos)</label>
+            <input type="number" id="duracaoFilme" placeholder="Digite a duração em minutos" min="1" required>
+
+            <label for="classificacaoIndicativaFilme">📊 Classificação Indicativa</label>
+            <select id="classificacaoIndicativaFilme" required>
+                <option value="L">L - Livre para todos os públicos</option>
+                <option value="10">10 - Não recomendado para menores de 10 anos</option>
+                <option value="12">12 - Não recomendado para menores de 12 anos</option>
+                <option value="14">14 - Não recomendado para menores de 14 anos</option>
+                <option value="16">16 - Não recomendado para menores de 16 anos</option>
+                <option value="18">18 - Não recomendado para menores de 18 anos</option>
+            </select>
+
+            <!-- ===== SEÇÃO: DESCRIÇÃO ===== -->
+            <label for="sinopseFilme">📝 Sinopse</label>
+            <textarea id="sinopseFilme" 
+                      placeholder="Descreva a sinopse do filme (máximo 500 caracteres)" 
+                      maxlength="500" required></textarea>
+
+            <!-- ===== SEÇÃO: INFORMAÇÕES DE EXIBIÇÃO ===== -->
+            <label for="dataEstreiaFilme">📅 Data de Estreia</label>
+            <input type="date" id="dataEstreiaFilme" required>
+
+            <label for="cartazFilme">🖼️ URL do Cartaz</label>
+            <input type="url" id="cartazFilme" placeholder="Cole a URL da imagem do cartaz" required>
+
+            <label for="statusFilme">📈 Status de Exibição</label>
+            <select id="statusFilme" required>
+                <option value="Em Cartaz">🎬 Em Cartaz - Atualmente em exibição</option>
+                <option value="Em Breve">⏳ Em Breve - Em breve nos cinemas</option>
+            </select>
+
+            <!-- ===== BOTÕES DE AÇÃO DO FORMULÁRIO ===== -->
+            <div class="form-buttons">
+                <button type="submit" id="submitBtn">✅ Salvar Filme</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ===== SCRIPTS DO SISTEMA ===== -->
+    <script src="script.js"></script>
+</body>
+</html>

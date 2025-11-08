@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- ===== METADADOS E CONFIGURAÇÕES ===== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Painel Administrativo - Sistema de Cinema</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="fade-in">
+    <!-- ===== CONTAINER PRINCIPAL ===== -->
+    <div class="container">
+        
+        <!-- ===== CABEÇALHO DE NAVEGAÇÃO ===== -->
+        <div class="navigation-buttons">
+            <h1 class="page-title" data-page="admin">⚙️ Painel Administrativo</h1>
+            <button id="logoutBtn" class="nav-btn logout">Sair do Sistema</button>
+        </div>
+
+        <!-- ===== CONTEÚDO PRINCIPAL ===== -->
+        <main class="dashboard-container">
+            
+            <!-- ===== MENSAGEM DE BOAS-VINDAS ===== -->
+            <div class="welcome-message">
+                <h2>👋 Bem-vindo, Administrador!</h2>
+                <p>Selecione abaixo o que deseja gerenciar em nosso sistema:</p>
+            </div>
+
+            <!-- ===== OPÇÕES DO DASHBOARD ===== -->
+            <div class="dashboard-options">
+                
+                <!-- ===== CARD: GERENCIAR USUÁRIOS ===== -->
+                <div class="dashboard-card">
+                    <div class="card-icon">👥</div>
+                    <h3>Gerenciar Usuários</h3>
+                    <p>Cadastre, edite, visualize ou remova usuários do sistema. 
+                       Controle perfis de acesso e status dos usuários.</p>
+                    <button onclick="window.location.href='crud_usuario.html'" class="card-btn">
+                        Acessar
+                    </button>
+                </div>
+
+                <!-- ===== CARD: GERENCIAR FILMES ===== -->
+                <div class="dashboard-card">
+                    <div class="card-icon">🎞️</div>
+                    <h3>Gerenciar Filmes</h3>
+                    <p>Adicione novos filmes, edite informações, gerencie o catálogo 
+                       e controle a programação do cinema.</p>
+                    <button onclick="window.location.href='crud_filme.html'" class="card-btn">
+                        Acessar
+                    </button>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ===== SCRIPTS DO SISTEMA ===== -->
+    <script src="script.js"></script>
+</body>
+</html>
