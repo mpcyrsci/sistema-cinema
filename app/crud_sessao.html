@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- ===== METADADOS E CONFIGURAÇÕES ===== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 Gerenciar Sessões - Sistema de Cinema</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="fade-in">
+    <!-- ===== CONTAINER PRINCIPAL ===== -->
+    <div class="container">
+        
+        <!-- ===== CABEÇALHO DE NAVEGAÇÃO ===== -->
+        <div class="navigation-buttons">
+            <!-- Botão de Ação Principal -->
+            <button id="addSessionBtn" class="nav-btn">🎭 Adicionar Nova Sessão</button>
+            
+            <!-- Botões de Navegação (Direita) -->
+            <div class="nav-buttons-right">
+                <button id="backToAdminBtn" class="nav-btn back-btn">⬅️ Voltar ao Painel</button>
+                <button id="logoutBtn" class="nav-btn logout">Sair do Sistema</button>
+            </div>
+        </div>
+
+        <!-- ===== TÍTULO DA PÁGINA ===== -->
+        <h2 class="page-title" data-page="sessoes">Gerenciar Sessões</h2>
+
+        <!-- ===== BARRA DE PESQUISA ===== -->
+        <input type="text" id="searchInput" 
+               placeholder="🔍 Pesquisar por filme, sala, data ou horário..." 
+               class="search-box">
+
+        <!-- ===== TABELA DE SESSÕES ===== -->
+        <table id="sessionTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Filme</th>
+                    <th>Sala</th>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Preço (R$)</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- ===== ÁREA DINÂMICA ===== -->
+                <!-- As sessões serão carregadas aqui via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ===== MODAL PARA ADICIONAR/EDITAR SESSÃO ===== -->
+    <div id="sessionModal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="modalTitle">Adicionar Nova Sessão</h3>
+            
+            <form id="sessionForm">
+                <!-- Filme Vinculado -->
+                <label for="filme">Filme *</label>
+                <select id="filme" name="filme" required>
+                    <option value="">Selecione um filme</option>
+                    <!-- Os filmes serão carregados dinamicamente -->
+                </select>
+
+                <!-- Sala Vinculada -->
+                <label for="sala">Sala *</label>
+                <select id="sala" name="sala" required>
+                    <option value="">Selecione uma sala</option>
+                    <!-- As salas serão carregadas dinamicamente -->
+                </select>
+
+                <!-- Data -->
+                <label for="data">Data *</label>
+                <input type="date" id="data" name="data" required>
+
+                <!-- Horário -->
+                <label for="horario">Horário *</label>
+                <input type="time" id="horario" name="horario" required>
+
+                <!-- Preço do Ingresso -->
+                <label for="preco">Preço do Ingresso (R$) *</label>
+                <input type="number" id="preco" name="preco" min="0" step="0.01" placeholder="25.00" required>
+
+                <!-- Status -->
+                <label for="status">Status *</label>
+                <select id="status" name="status" required>
+                    <option value="">Selecione o status</option>
+                    <option value="aguardando">Aguardando</option>
+                    <option value="em_andamento">Em andamento</option>
+                    <option value="cancelada">Cancelada</option>
+                </select>
+
+                <div class="modal-buttons">
+                    <button type="button" id="cancelBtn" class="nav-btn">Cancelar</button>
+                    <button type="submit" id="saveBtn" class="card-btn">Salvar Sessão</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE CONFIRMAÇÃO DE EXCLUSÃO ===== -->
+    <div id="deleteModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Confirmar Exclusão</h3>
+            <p>Tem certeza que deseja excluir esta sessão? Esta ação não pode ser desfeita.</p>
+            <div class="modal-buttons">
+                <button id="cancelDeleteBtn" class="nav-btn">Cancelar</button>
+                <button id="confirmDeleteBtn" class="deleteBtn">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS DO SISTEMA ===== -->
+    <script src="script.js"></script>
+</body>
+</html>

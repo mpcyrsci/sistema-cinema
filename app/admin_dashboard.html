@@ -52,11 +52,30 @@
                     </button>
                 </div>
 
+                <!-- ===== CARD: GERENCIAR SESSÕES ===== -->
+                <div class="dashboard-card">
+                    <div class="card-icon">🎭</div>
+                    <h3>Gerenciar Sessões</h3>
+                    <p>Configure horários, salas e disponibilidade das sessões. 
+                       Gerencie a programação de exibição dos filmes.</p>
+                    <button onclick="window.location.href='crud_sessao.html'" class="card-btn">
+                        Acessar
+                    </button>
+                </div>
+
             </div>
         </main>
     </div>
 
     <!-- ===== SCRIPTS DO SISTEMA ===== -->
-    <script src="script.js"></script>
+    <script>
+        // Função para logout
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if (confirm('Tem certeza que deseja sair do sistema?')) {
+                // Redirecionar para a página de login
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
 </body>
 </html>

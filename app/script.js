@@ -340,7 +340,7 @@ document.addEventListener("DOMContentLoaded", function() {
             if (editIndex !== null) {
                 movies[editIndex] = movieData;
                 localStorage.removeItem(CONFIG.STORAGE_KEYS.EDIT_INDEX);
-                alert("🎉 Filme atualizado com sucesso!");
+                // alert("🎉 Filme atualizado com sucesso!");
             } else {
                 movies.push(movieData);
                 alert("🎉 Filme cadastrado com sucesso!");
@@ -787,6 +787,382 @@ document.addEventListener("DOMContentLoaded", function() {
     if (currentPage === "index.html") {
         console.log("🔐 Configurando Página de Login");
         // Event listeners já configurados via onclick no HTML
+    }
+
+        // ===== PÁGINA: GERENCIAR SESSÕES (CRUD) =====
+    if (currentPage === "crud_sessao.html") {
+        console.log("🎭 Configurando Gerenciamento de Sessões");
+
+        const addSessionBtn = document.getElementById('addSessionBtn');
+        const backToAdminBtn = document.getElementById('backToAdminBtn');
+        const sessionTableBody = document.querySelector("#sessionTable tbody");
+        const sessionSearchInput = document.getElementById('searchInput');
+        const logoutBtn = document.getElementById("logoutBtn");
+        const sessionModal = document.getElementById("sessionModal");
+        const deleteModal = document.getElementById("deleteModal");
+        const sessionForm = document.getElementById("sessionForm");
+        const cancelBtn = document.getElementById("cancelBtn");
+        const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+        const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+
+        const STORAGE_KEYS = {
+            SESSOES: "sessoes"
+        };
+
+        let sessions = JSON.parse(localStorage.getItem(STORAGE_KEYS.SESSOES)) || [];
+        let currentSessionId = null;
+        let isEditing = false;
+        let sessionToDelete = null;
+
+        // Dados de salas disponíveis
+        const salas = [
+            { id: 1, nome: "Sala 1 - 2D", capacidade: 100, tipo: "2D" },
+            { id: 2, nome: "Sala 2 - 3D", capacidade: 80, tipo: "3D" },
+            { id: 3, nome: "Sala 3 - IMAX", capacidade: 120, tipo: "IMAX" },
+            { id: 4, nome: "Sala 4 - 2D", capacidade: 90, tipo: "2D" },
+            { id: 5, nome: "Sala 5 - VIP", capacidade: 50, tipo: "VIP" }
+        ];
+
+        // BOTÕES DE NAVEGAÇÃO
+        if (backToAdminBtn) {
+            backToAdminBtn.addEventListener("click", function() {
+                console.log("⬅️ Voltando para painel administrativo");
+                window.location.href = "admin_dashboard.html";
+            });
+        }
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", logout);
+        }
+
+        /**
+         * Carrega filmes no select do formulário
+         */
+        function carregarFilmesSelect() {
+            const select = document.getElementById('filme');
+            const movies = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FILMES)) || [];
+            
+            select.innerHTML = '<option value="">Selecione um filme</option>';
+            movies.forEach(movie => {
+                const option = document.createElement('option');
+                option.value = movie.titulo;
+                option.textContent = movie.titulo;
+                select.appendChild(option);
+            });
+        }
+
+        /**
+         * Carrega salas no select do formulário
+         */
+        function carregarSalasSelect() {
+            const select = document.getElementById('sala');
+            select.innerHTML = '<option value="">Selecione uma sala</option>';
+            
+            salas.forEach(sala => {
+                const option = document.createElement('option');
+                option.value = sala.nome;
+                option.textContent = sala.nome;
+                select.appendChild(option);
+            });
+        }
+
+        /**
+         * Formata data no padrão DD/MM/AAAA
+         */
+        function formatarDataSessao(dataString) {
+            if (!dataString) return "";
+            const [ano, mes, dia] = dataString.split('-');
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        /**
+         * Formata preço no padrão brasileiro
+         */
+        function formatarPrecoSessao(preco) {
+            return `R$ ${preco.toFixed(2).replace('.', ',')}`;
+        }
+
+        /**
+         * Formata status para exibição
+         */
+        function formatarStatusSessao(status) {
+            const statusMap = {
+                'aguardando': 'Aguardando',
+                'em_andamento': 'Em andamento',
+                'cancelada': 'Cancelada'
+            };
+            return statusMap[status] || status;
+        }
+
+        /**
+         * Renderiza a tabela de sessões com filtro
+         */
+        function renderSessionTable(filter = "") {
+            if (!sessionTableBody) return;
+            sessionTableBody.innerHTML = "";
+
+            // Aplicar filtro
+            let filteredSessions = sessions.filter(session => {
+                const term = filter.toLowerCase();
+                return (
+                    (session.filme && session.filme.toLowerCase().includes(term)) ||
+                    (session.sala && session.sala.toLowerCase().includes(term)) ||
+                    (session.data && formatarDataSessao(session.data).includes(term)) ||
+                    (session.horario && session.horario.includes(term)) ||
+                    (session.status && formatarStatusSessao(session.status).toLowerCase().includes(term))
+                );
+            });
+
+            // Mensagem para lista vazia
+            if (filteredSessions.length === 0) {
+                const row = sessionTableBody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 8;
+                cell.textContent = "🎭 Nenhuma sessão encontrada";
+                cell.style.textAlign = "center";
+                cell.style.color = "#ccc";
+                cell.style.padding = "2rem";
+                return;
+            }
+
+            // Preencher tabela
+            filteredSessions.forEach((session, index) => {
+                const row = sessionTableBody.insertRow();
+                row.insertCell(0).textContent = index + 1;
+                row.insertCell(1).textContent = session.filme || "Não informado";
+                row.insertCell(2).textContent = session.sala || "Não informada";
+                row.insertCell(3).textContent = formatarDataSessao(session.data) || "Não informada";
+                row.insertCell(4).textContent = session.horario || "Não informado";
+                row.insertCell(5).textContent = session.preco ? formatarPrecoSessao(session.preco) : "Não informado";
+                row.insertCell(6).textContent = formatarStatusSessao(session.status) || "Não informado";
+
+                const actionsCell = row.insertCell(7);
+                
+                // Botão Editar
+                const editBtn = document.createElement('button');
+                editBtn.textContent = '✏️ Editar';
+                editBtn.className = 'editBtn';
+                editBtn.addEventListener('click', () => {
+                    editarSessao(index);
+                });
+                actionsCell.appendChild(editBtn);
+
+                // Botão Excluir
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '🗑️ Excluir';
+                deleteBtn.className = 'deleteBtn';
+                deleteBtn.addEventListener('click', () => {
+                    abrirModalExclusao(index);
+                });
+                actionsCell.appendChild(deleteBtn);
+            });
+        }
+
+        /**
+         * Abre modal para adicionar nova sessão
+         */
+        function abrirModalAdicionar() {
+            isEditing = false;
+            currentSessionId = null;
+            document.getElementById('modalTitle').textContent = 'Adicionar Nova Sessão';
+            sessionForm.reset();
+            sessionModal.classList.remove('hidden');
+        }
+
+        /**
+         * Abre modal para editar sessão existente
+         */
+        function editarSessao(index) {
+            const session = sessions[index];
+            if (!session) return;
+
+            isEditing = true;
+            currentSessionId = index;
+            document.getElementById('modalTitle').textContent = 'Editar Sessão';
+            
+            // Preencher formulário com dados da sessão
+            document.getElementById('filme').value = session.filme || "";
+            document.getElementById('sala').value = session.sala || "";
+            document.getElementById('data').value = session.data || "";
+            document.getElementById('horario').value = session.horario || "";
+            document.getElementById('preco').value = session.preco || "";
+            document.getElementById('status').value = session.status || "";
+            
+            sessionModal.classList.remove('hidden');
+        }
+
+        /**
+         * Fecha o modal de sessão
+         */
+        function fecharModal() {
+            sessionModal.classList.add('hidden');
+            currentSessionId = null;
+            isEditing = false;
+        }
+
+        /**
+         * Abre modal de confirmação de exclusão
+         */
+        function abrirModalExclusao(index) {
+            sessionToDelete = index;
+            deleteModal.classList.remove('hidden');
+        }
+
+        /**
+         * Fecha modal de exclusão
+         */
+        function fecharModalExclusao() {
+            sessionToDelete = null;
+            deleteModal.classList.add('hidden');
+        }
+
+        /**
+         * Confirma e executa a exclusão
+         */
+        function confirmarExclusao() {
+            if (sessionToDelete !== null) {
+                sessions.splice(sessionToDelete, 1);
+                localStorage.setItem(STORAGE_KEYS.SESSOES, JSON.stringify(sessions));
+                renderSessionTable(sessionSearchInput.value);
+                fecharModalExclusao();
+                alert('Sessão excluída com sucesso!');
+            }
+        }
+
+        /**
+         * Valida dados da sessão
+         */
+        function validarSessao(sessaoData) {
+            // Verificar conflito de horário
+            const conflito = sessions.find((s, index) => 
+                index !== currentSessionId &&
+                s.sala === sessaoData.sala &&
+                s.data === sessaoData.data &&
+                s.horario === sessaoData.horario
+            );
+
+            if (conflito) {
+                alert('Já existe uma sessão agendada para esta sala no mesmo horário e data!');
+                return false;
+            }
+
+            // Verificar data futura
+            const hoje = new Date().toISOString().split('T')[0];
+            if (sessaoData.data < hoje) {
+                alert('A data da sessão não pode ser no passado!');
+                return false;
+            }
+
+            return true;
+        }
+
+        /**
+         * Manipula o envio do formulário de sessão
+         */
+        function handleSessionFormSubmit(e) {
+            e.preventDefault();
+            console.log("📤 Processando formulário de sessão...");
+
+            // Captura dados do formulário
+            const sessionData = {
+                filme: document.getElementById("filme").value,
+                sala: document.getElementById("sala").value,
+                data: document.getElementById("data").value,
+                horario: document.getElementById("horario").value,
+                preco: parseFloat(document.getElementById("preco").value),
+                status: document.getElementById("status").value
+            };
+
+            // Validações básicas
+            if (!sessionData.filme) {
+                alert("Selecione um filme!");
+                return;
+            }
+
+            if (!sessionData.sala) {
+                alert("Selecione uma sala!");
+                return;
+            }
+
+            if (!sessionData.data) {
+                alert("Selecione uma data!");
+                return;
+            }
+
+            if (!sessionData.horario) {
+                alert("Selecione um horário!");
+                return;
+            }
+
+            if (!sessionData.preco || sessionData.preco <= 0) {
+                alert("Preço deve ser maior que zero!");
+                return;
+            }
+
+            // Validações específicas
+            if (!validarSessao(sessionData)) {
+                return;
+            }
+
+            // Salva no localStorage
+            if (isEditing && currentSessionId !== null) {
+                // Editar sessão existente
+                sessions[currentSessionId] = sessionData;
+                alert("🎉 Sessão atualizada com sucesso!");
+            } else {
+                // Adicionar nova sessão
+                sessions.push(sessionData);
+                alert("🎉 Sessão cadastrada com sucesso!");
+            }
+
+            localStorage.setItem(STORAGE_KEYS.SESSOES, JSON.stringify(sessions));
+            fecharModal();
+            renderSessionTable();
+        }
+
+        // EVENT LISTENERS
+        if (addSessionBtn) {
+            addSessionBtn.addEventListener('click', abrirModalAdicionar);
+        }
+
+        if (sessionSearchInput) {
+            sessionSearchInput.addEventListener('input', (e) => {
+                renderSessionTable(e.target.value);
+            });
+        }
+
+        if (sessionForm) {
+            sessionForm.addEventListener('submit', handleSessionFormSubmit);
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', fecharModal);
+        }
+
+        if (cancelDeleteBtn) {
+            cancelDeleteBtn.addEventListener('click', fecharModalExclusao);
+        }
+
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', confirmarExclusao);
+        }
+
+        // INICIALIZAÇÃO - GARANTIR QUE OS MODAIS ESTEJAM FECHADOS
+        function inicializarPagina() {
+            // Fechar todos os modais
+            if (sessionModal) sessionModal.classList.add('hidden');
+            if (deleteModal) deleteModal.classList.add('hidden');
+            
+            // Carregar dados
+            carregarFilmesSelect();
+            carregarSalasSelect();
+            renderSessionTable();
+            
+            console.log("✅ Página de sessões inicializada com sucesso");
+        }
+
+        // INICIALIZAR PÁGINA
+        inicializarPagina();
     }
 });
 
