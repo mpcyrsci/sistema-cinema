@@ -689,6 +689,196 @@ tr:last-child td {
     font-style: italic;
 }
 
+/* ===== ESTILOS PARA RELATÓRIO DE PROGRAMAÇÃO ===== */
+
+.week-schedule {
+    margin-top: 20px;
+}
+
+.day-schedule {
+    background: #2a2a2a;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-left: 4px solid #f4d03f;
+}
+
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #444;
+}
+
+.day-header h3 {
+    margin: 0;
+    color: #f4d03f;
+    font-size: 1.2em;
+}
+
+.session-count {
+    background: #444;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    color: #ccc;
+}
+
+.sessions-list {
+    display: grid;
+    gap: 10px;
+}
+
+.session-item {
+    background: #333;
+    padding: 15px;
+    border-radius: 8px;
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr 100px 120px;
+    gap: 10px;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.session-item:hover {
+    background: #3a3a3a;
+}
+
+.session-item.aguardando {
+    border-left: 3px solid #f4d03f;
+}
+
+.session-item.em_andamento {
+    border-left: 3px solid #2ecc71;
+}
+
+.session-item.cancelada {
+    border-left: 3px solid #e74c3c;
+    opacity: 0.7;
+}
+
+.session-time {
+    font-weight: bold;
+    color: #f4d03f;
+}
+
+.session-movie {
+    font-weight: 500;
+}
+
+.session-room {
+    color: #ccc;
+}
+
+.session-price {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+.session-status {
+    font-size: 0.9em;
+    padding: 4px 8px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+/* Seção de resumo */
+.summary-section {
+    background: #2a2a2a;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    border-left: 4px solid #3498db;
+}
+
+.summary-header h3 {
+    margin: 0 0 15px 0;
+    color: #3498db;
+}
+
+.summary-content {
+    display: grid;
+    gap: 10px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #444;
+}
+
+.summary-label {
+    color: #ccc;
+    font-weight: 500;
+}
+
+.summary-value {
+    color: #f4d03f;
+    font-weight: bold;
+}
+
+/* Estado vazio */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #ccc;
+}
+
+.empty-state h3 {
+    margin-bottom: 10px;
+    color: #f4d03f;
+}
+
+/* Seletor de período */
+.period-selector {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.period-selector h3 {
+    margin-top: 0;
+    color: #f4d03f;
+    margin-bottom: 15px;
+}
+
+.period-selector label {
+    display: block;
+    margin-bottom: 5px;
+    color: #ccc;
+    font-weight: 500;
+}
+
+.period-selector input {
+    width: 200px;
+    margin-bottom: 15px;
+    margin-right: 15px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .session-item {
+        grid-template-columns: 1fr;
+        gap: 5px;
+        text-align: center;
+    }
+    
+    .day-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .period-selector input {
+        width: 100%;
+        margin-right: 0;
+    }
+}
+
 /* ===== EMOJIS ESPECÍFICOS POR PÁGINA ===== */
 .page-title[data-page="usuarios"]::before { content: "👥"; }
 .page-title[data-page="filmes"]::before { content: "🎬"; }

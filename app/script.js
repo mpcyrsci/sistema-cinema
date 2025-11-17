@@ -1174,153 +1174,245 @@ document.addEventListener("DOMContentLoaded", function () {
         inicializarPagina();
     }
 
-    /* ================================
-   RELATÓRIO – PROGRAMAÇÃO POR PERÍODO
-   ================================ */
+    // ===== PÁGINA: RELATÓRIO DE PROGRAMAÇÃO =====
+    if (currentPage === "relatorio_programacao.html") {
+        console.log("📊 Configurando Relatório de Programação");
 
-    /**
-     * Constrói um objeto Date seguro a partir de "AAAA-MM-DD" + "HH:MM".
-     */
-    function construirData(dataStr, horarioStr) {
-        const [ano, mes, dia] = dataStr.split("-").map(Number);
-        const [hora, minuto] = horarioStr.split(":").map(Number);
-        return new Date(ano, mes - 1, dia, hora, minuto);
-    }
+        const weekSchedule = document.getElementById('weekSchedule');
+        const inicioInput = document.getElementById('inicio');
+        const fimInput = document.getElementById('fim');
+        const filterPeriodBtn = document.getElementById('filterPeriodBtn');
+        const backToAdminBtn = document.getElementById('backToAdminBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
 
-    /**
-     * Função principal: carrega a programação dentro de um período.
-     */
-    function carregarProgramacaoPorPeriodo(dataInicio, dataFim) {
-        const container = document.getElementById("weekSchedule");
-        if (!container) return;
+        const STORAGE_KEYS = {
+            SESSOES: "sessoes"
+        };
 
-        // Normalizar datas para início e fim do dia
-        const inicio = new Date(dataInicio);
-        inicio.setHours(0, 0, 0, 0);
-
-        const fim = new Date(dataFim);
-        fim.setHours(23, 59, 59, 999);
-
-        // Buscar sessões
-        const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
-
-        // Agrupar sessões por data (AAAA-MM-DD)
-        const grupos = {};
-
-        sessoes.forEach(sessao => {
-            const dataSessao = construirData(sessao.data, sessao.horario);
-
-            if (dataSessao >= inicio && dataSessao <= fim) {
-                if (!grupos[sessao.data]) grupos[sessao.data] = [];
-                grupos[sessao.data].push(sessao);
-            }
-        });
-
-        // Renderização
-        container.innerHTML = "";
-
-        const datasOrdenadas = Object.keys(grupos).sort();
-
-        if (datasOrdenadas.length === 0) {
-            container.innerHTML = `<p class="empty-day">Nenhuma sessão encontrada nesse período.</p>`;
-            return;
+        // BOTÕES DE NAVEGAÇÃO
+        if (backToAdminBtn) {
+            backToAdminBtn.addEventListener("click", function () {
+                console.log("⬅️ Voltando para painel administrativo");
+                window.location.href = "admin_dashboard.html";
+            });
         }
 
-        datasOrdenadas.forEach(data => {
-            const bloco = document.createElement("div");
-            bloco.classList.add("day-block");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", logout);
+        }
 
-            const dataFormatada = new Date(data + "T00:00").toLocaleDateString("pt-BR");
+        /**
+         * Formata data no padrão DD/MM/AAAA
+         */
+        function formatarDataRelatorio(dataString) {
+            if (!dataString) return "";
+            const [ano, mes, dia] = dataString.split('-');
+            return `${dia}/${mes}/${ano}`;
+        }
 
-            bloco.innerHTML = `
-            <h3 class="day-title">${dataFormatada}</h3>
-            ${gerarTabelaDia(grupos[data])}
+        /**
+         * Formata dia da semana em português
+         */
+        function formatarDiaSemana(dataString) {
+            if (!dataString) return "";
+            const data = new Date(dataString + 'T00:00:00');
+            const dias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+            return dias[data.getDay()];
+        }
+
+        /**
+         * Formata preço no padrão brasileiro
+         */
+        function formatarPrecoRelatorio(preco) {
+            return `R$ ${preco.toFixed(2).replace('.', ',')}`;
+        }
+
+        /**
+         * Formata status para exibição
+         */
+        function formatarStatusRelatorio(status) {
+            const statusMap = {
+                'aguardando': '🟡 Aguardando',
+                'em_andamento': '🟢 Em andamento',
+                'cancelada': '🔴 Cancelada'
+            };
+            return statusMap[status] || status;
+        }
+
+        /**
+         * Obtém a data de início da semana (segunda-feira)
+         */
+        function getInicioSemana() {
+            const hoje = new Date();
+            const dia = hoje.getDay();
+            const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1); // Ajusta domingo para última semana
+            const inicioSemana = new Date(hoje.setDate(diff));
+            return inicioSemana.toISOString().split('T')[0];
+        }
+
+        /**
+         * Obtém a data de fim da semana (domingo)
+         */
+        function getFimSemana() {
+            const inicioSemana = new Date(getInicioSemana());
+            const fimSemana = new Date(inicioSemana);
+            fimSemana.setDate(fimSemana.getDate() + 6);
+            return fimSemana.toISOString().split('T')[0];
+        }
+
+        /**
+         * Agrupa sessões por data
+         */
+        function agruparSessoesPorData(sessoes) {
+            const agrupadas = {};
+
+            sessoes.forEach(sessao => {
+                if (!agrupadas[sessao.data]) {
+                    agrupadas[sessao.data] = [];
+                }
+                agrupadas[sessao.data].push(sessao);
+            });
+
+            // Ordenar sessões por horário dentro de cada dia
+            Object.keys(agrupadas).forEach(data => {
+                agrupadas[data].sort((a, b) => a.horario.localeCompare(b.horario));
+            });
+
+            return agrupadas;
+        }
+
+        /**
+         * Renderiza o relatório de programação
+         */
+        function renderRelatorio(dataInicio, dataFim) {
+            if (!weekSchedule) return;
+
+            const sessoes = JSON.parse(localStorage.getItem(STORAGE_KEYS.SESSOES)) || [];
+
+            // Filtrar sessões pelo período
+            const sessoesFiltradas = sessoes.filter(sessao => {
+                return sessao.data >= dataInicio && sessao.data <= dataFim;
+            });
+
+            // Ordenar sessões por data
+            sessoesFiltradas.sort((a, b) => a.data.localeCompare(b.data));
+
+            // Agrupar por data
+            const sessoesAgrupadas = agruparSessoesPorData(sessoesFiltradas);
+
+            // Ordenar datas
+            const datasOrdenadas = Object.keys(sessoesAgrupadas).sort();
+
+            weekSchedule.innerHTML = '';
+
+            if (datasOrdenadas.length === 0) {
+                weekSchedule.innerHTML = `
+                <div class="empty-state">
+                    <h3>📭 Nenhuma sessão encontrada</h3>
+                    <p>Não há sessões programadas para o período selecionado.</p>
+                </div>
+            `;
+                return;
+            }
+
+            // Criar relatório
+            datasOrdenadas.forEach(data => {
+                const sessoesDoDia = sessoesAgrupadas[data];
+                const diaSemana = formatarDiaSemana(data);
+                const dataFormatada = formatarDataRelatorio(data);
+
+                const diaSection = document.createElement('div');
+                diaSection.className = 'day-schedule';
+                diaSection.innerHTML = `
+                <div class="day-header">
+                    <h3>${diaSemana} - ${dataFormatada}</h3>
+                    <span class="session-count">${sessoesDoDia.length} sessão(ões)</span>
+                </div>
+                <div class="sessions-list">
+                    ${sessoesDoDia.map(sessao => `
+                        <div class="session-item ${sessao.status}">
+                            <div class="session-time">🕒 ${sessao.horario}</div>
+                            <div class="session-movie">🎬 ${sessao.filme}</div>
+                            <div class="session-room">📍 ${sessao.sala}</div>
+                            <div class="session-price">💰 ${formatarPrecoRelatorio(sessao.preco)}</div>
+                            <div class="session-status">${formatarStatusRelatorio(sessao.status)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+                weekSchedule.appendChild(diaSection);
+            });
+
+            // Adicionar resumo
+            const resumoSection = document.createElement('div');
+            resumoSection.className = 'summary-section';
+            resumoSection.innerHTML = `
+            <div class="summary-header">
+                <h3>📈 Resumo do Período</h3>
+            </div>
+            <div class="summary-content">
+                <div class="summary-item">
+                    <span class="summary-label">Período:</span>
+                    <span class="summary-value">${formatarDataRelatorio(dataInicio)} a ${formatarDataRelatorio(dataFim)}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Total de Sessões:</span>
+                    <span class="summary-value">${sessoesFiltradas.length}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Dias com Programação:</span>
+                    <span class="summary-value">${datasOrdenadas.length}</span>
+                </div>
+            </div>
         `;
 
-            container.appendChild(bloco);
-        });
-    }
+            weekSchedule.appendChild(resumoSection);
+        }
 
-    /**
-     * Monta uma tabela com as sessões do dia.
-     */
-    function gerarTabelaDia(lista) {
-        return `
-        <table class="report-table">
-            <thead>
-                <tr>
-                    <th>Filme</th>
-                    <th>Sala</th>
-                    <th>Horário</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${lista.map(sess => `
-                    <tr>
-                        <td>${sess.filme}</td>
-                        <td>${sess.sala}</td>
-                        <td>${sess.horario}</td>
-                        <td>${formatarStatus(sess.status)}</td>
-                    </tr>
-                `).join("")}
-            </tbody>
-        </table>
-    `;
-    }
+        /**
+         * Aplica o filtro de período
+         */
+        function aplicarFiltro() {
+            const dataInicio = inicioInput.value;
+            const dataFim = fimInput.value;
 
-    /**
-     * Converte status interno para texto amigável.
-     */
-    function formatarStatus(status) {
-        const map = {
-            aguardando: "Aguardando",
-            em_andamento: "Em andamento",
-            cancelada: "Cancelada"
-        };
-        return map[status] || status;
-    }
-
-    /**
-     * Inicialização
-     */
-    document.addEventListener("DOMContentLoaded", () => {
-        const filterBtn = document.getElementById("filterPeriodBtn");
-
-        filterBtn.addEventListener("click", () => {
-            const inicio = document.getElementById("inicio").value;
-            const fim = document.getElementById("fim").value;
-
-            if (!inicio || !fim) {
-                alert("Por favor, selecione a data inicial e final.");
+            if (!dataInicio || !dataFim) {
+                alert('Por favor, selecione ambas as datas (início e fim)');
                 return;
             }
 
-            if (new Date(inicio) > new Date(fim)) {
-                alert("A data inicial não pode ser maior que a data final.");
+            if (dataInicio > dataFim) {
+                alert('A data inicial não pode ser maior que a data final');
                 return;
             }
 
-            carregarProgramacaoPorPeriodo(inicio, fim);
-        });
+            renderRelatorio(dataInicio, dataFim);
+        }
 
-        // Exibir semana atual ao abrir
-        const hoje = new Date();
-        const primeiroDia = new Date(hoje);
-        primeiroDia.setDate(hoje.getDate() - hoje.getDay());
+        // EVENT LISTENERS
+        if (filterPeriodBtn) {
+            filterPeriodBtn.addEventListener('click', aplicarFiltro);
+        }
 
-        const ultimoDia = new Date(primeiroDia);
-        ultimoDia.setDate(primeiroDia.getDate() + 6);
+        // INICIALIZAÇÃO
+        function inicializarRelatorio() {
+            // Definir datas padrão (esta semana)
+            const inicioSemana = getInicioSemana();
+            const fimSemana = getFimSemana();
 
-        // Preenche os inputs automaticamente com a semana atual
-        document.getElementById("inicio").value = primeiroDia.toISOString().split("T")[0];
-        document.getElementById("fim").value = ultimoDia.toISOString().split("T")[0];
+            if (inicioInput) inicioInput.value = inicioSemana;
+            if (fimInput) fimInput.value = fimSemana;
 
-        carregarProgramacaoPorPeriodo(
-            primeiroDia.toISOString().split("T")[0],
-            ultimoDia.toISOString().split("T")[0]
-        );
-    });
+            // Renderizar relatório inicial
+            renderRelatorio(inicioSemana, fimSemana);
+
+            console.log("✅ Relatório de programação inicializado com sucesso");
+        }
+
+        // INICIALIZAR PÁGINA
+        inicializarRelatorio();
+    }
 
 
 });
