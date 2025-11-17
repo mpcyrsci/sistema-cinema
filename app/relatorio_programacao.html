@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📅 Programação Geral da Semana - Cinema</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="fade-in">
+    <div class="container">
+
+        <!-- CABEÇALHO -->
+        <div class="navigation-buttons">
+            <button id="backToAdminBtn" class="nav-btn back-btn">⬅️ Voltar ao Painel</button>
+            <button id="logoutBtn" class="nav-btn logout">Sair do Sistema</button>
+        </div>
+
+        <h2 class="page-title">📅 Programação Geral da Semana</h2>
+        <p style="margin-bottom: 15px; opacity: 0.8;">
+            Relatório geral com todas as sessões programadas para esta semana, agrupadas por dia.
+        </p>
+
+        <div id="weekSchedule" class="week-schedule">
+            <!-- Conteúdo preenchido via script.js -->
+        </div>
+
+        <div class="period-selector">
+            <h3>Selecionar Período</h3>
+
+            <label for="inicio">Data inicial:</label>
+            <input type="date" id="inicio">
+
+            <label for="fim">Data final:</label>
+            <input type="date" id="fim">
+
+            <button id="filterPeriodBtn">Filtrar</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Voltar ao painel
+        document.getElementById("backToAdminBtn").addEventListener("click", () => {
+            window.location.href = "admin_dashboard.html";
+        });
+
+        // Logout unificado
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            if (confirm("Tem certeza que deseja sair?")) {
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+</body>
+
+</html>

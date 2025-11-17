@@ -57,6 +57,9 @@ function cadastrar() {
 /**
  * Realiza o login no sistema
  */
+/**
+ * Realiza o login no sistema
+ */
 function login() {
     const email = document.getElementById("loginEmail").value;
     const senha = document.getElementById("loginSenha").value;
@@ -67,9 +70,15 @@ function login() {
         return;
     }
 
-    // Login como usuário comum
+    // Carregar usuários de ambas as origens
     const usuarios = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USUARIOS)) || [];
-    const usuario = usuarios.find(u => u.email === email && u.senha === senha);
+    const users = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USERS)) || [];
+
+    // Unificar listas
+    const todosUsuarios = [...usuarios, ...users];
+
+    // Buscar usuário correspondente
+    const usuario = todosUsuarios.find(u => u.email === email && u.senha === senha || u.email === email && u.password === senha);
 
     if (usuario) {
         localStorage.setItem(CONFIG.STORAGE_KEYS.USUARIO_LOGADO, JSON.stringify(usuario));
@@ -117,7 +126,7 @@ function carregarUsuarios() {
     const usuarios = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USUARIOS)) || [];
     const tbody = document.querySelector("#tabelaUsuarios tbody");
     if (!tbody) return;
-    
+
     tbody.innerHTML = "";
     usuarios.forEach(u => {
         const tr = document.createElement("tr");
@@ -133,7 +142,7 @@ function carregarFilmes() {
     const filmes = JSON.parse(localStorage.getItem("filmes")) || [];
     const tabela = document.querySelector("#tabelaFilmes tbody");
     if (!tabela) return;
-    
+
     tabela.innerHTML = "";
     filmes.forEach(f => {
         const tr = document.createElement("tr");
@@ -149,7 +158,7 @@ function carregarCatalogo() {
     const filmes = JSON.parse(localStorage.getItem("filmes")) || [];
     const catalogo = document.getElementById("catalogo");
     if (!catalogo) return;
-    
+
     catalogo.innerHTML = "";
     filmes.forEach(f => {
         const card = document.createElement("div");
@@ -170,7 +179,7 @@ function mostrarSecao(secao) {
     document.querySelectorAll(".section").forEach(s => s.classList.add("hidden"));
     const secaoAlvo = document.querySelector(`#${secao}Secao`);
     if (secaoAlvo) secaoAlvo.classList.remove("hidden");
-    
+
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
     const tabAlvo = document.querySelector(`.tab[onclick*='${secao}']`);
     if (tabAlvo) tabAlvo.classList.add("active");
@@ -178,9 +187,9 @@ function mostrarSecao(secao) {
 
 // ===== SISTEMA DE EVENT LISTENERS POR PÁGINA =====
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     console.log("🎬 Sistema de Cinema - Inicializando...");
-    
+
     const path = window.location.pathname;
     const currentPage = path.split('/').pop() || 'index.html';
     console.log("📄 Página atual:", currentPage);
@@ -188,7 +197,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // ===== PÁGINA: PAINEL ADMINISTRATIVO =====
     if (currentPage === "admin_dashboard.html") {
         console.log("⚙️ Configurando Painel Administrativo");
-        
+
         const logoutBtn = document.getElementById("logoutBtn");
         if (logoutBtn) {
             logoutBtn.addEventListener("click", logout);
@@ -206,8 +215,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Lista de gêneros disponíveis
         const GENEROS = [
-            "Ação", "Aventura", "Comédia", "Drama", 
-            "Fantasia", "Ficção Científica", "Romance", 
+            "Ação", "Aventura", "Comédia", "Drama",
+            "Fantasia", "Ficção Científica", "Romance",
             "Suspense", "Terror"
         ];
 
@@ -216,14 +225,14 @@ document.addEventListener("DOMContentLoaded", function() {
          */
         function criarBotoesGenero() {
             if (!generoContainer) return;
-            
+
             generoContainer.innerHTML = '';
             GENEROS.forEach(genero => {
                 const botao = document.createElement('div');
                 botao.className = 'genero-botao';
                 botao.textContent = genero;
                 botao.dataset.value = genero;
-                
+
                 // Aplicar estilos diretamente
                 Object.assign(botao.style, {
                     display: 'inline-block',
@@ -239,7 +248,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     userSelect: 'none'
                 });
 
-                botao.addEventListener('click', function() {
+                botao.addEventListener('click', function () {
                     const estaSelecionado = this.classList.contains('selecionado');
                     if (estaSelecionado) {
                         this.classList.remove('selecionado');
@@ -260,7 +269,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
                     atualizarGenerosSelecionados();
                 });
-                
+
                 generoContainer.appendChild(botao);
             });
         }
@@ -281,7 +290,7 @@ document.addEventListener("DOMContentLoaded", function() {
             if (!generosFilme || !generoContainer) return;
             const generosArray = generosFilme.split(', ');
             const botoes = generoContainer.querySelectorAll('.genero-botao');
-            
+
             botoes.forEach(botao => {
                 if (generosArray.includes(botao.dataset.value)) {
                     botao.classList.add('selecionado');
@@ -358,14 +367,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // EVENT LISTENERS
         if (form) {
-            form.addEventListener("submit", function(e) {
+            form.addEventListener("submit", function (e) {
                 e.preventDefault();
                 handleFormSubmit();
             });
         }
 
         if (backToAdminBtn) {
-            backToAdminBtn.addEventListener("click", function() {
+            backToAdminBtn.addEventListener("click", function () {
                 console.log("⬅️ Voltando para gerenciamento de filmes");
                 localStorage.removeItem(CONFIG.STORAGE_KEYS.EDIT_INDEX);
                 window.location.href = "crud_filme.html";
@@ -381,7 +390,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (editIndexStr !== null) {
             const movies = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FILMES)) || [];
             const movie = movies[editIndexStr];
-            
+
             if (movie) {
                 console.log("✏️ Preenchendo formulário para edição");
                 document.getElementById("tituloFilme").value = movie.titulo || "";
@@ -391,7 +400,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById("dataEstreiaFilme").value = movie.dataEstreia || "";
                 document.getElementById("cartazFilme").value = movie.cartaz || "";
                 document.getElementById("statusFilme").value = movie.status || "Em Cartaz";
-                
+
                 if (movie.genero) preencherGeneros(movie.genero);
             }
         }
@@ -411,7 +420,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // BOTÕES DE NAVEGAÇÃO
         if (backToAdminBtn) {
-            backToAdminBtn.addEventListener("click", function() {
+            backToAdminBtn.addEventListener("click", function () {
                 console.log("⬅️ Voltando para painel administrativo");
                 window.location.href = "admin_dashboard.html";
             });
@@ -459,13 +468,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 row.insertCell(3).textContent = movie.duracao || "Não informada";
                 row.insertCell(4).textContent = movie.classificacao || "L";
                 row.insertCell(5).textContent = movie.sinopse || "Sem sinopse";
-                
+
                 // Data formatada no padrão brasileiro
                 const dataEstreiaFormatada = formatDate(movie.dataEstreia);
                 row.insertCell(6).textContent = dataEstreiaFormatada || "Não informada";
 
                 const actionsCell = row.insertCell(7);
-                
+
                 // Botão Editar
                 const editBtn = document.createElement('button');
                 editBtn.textContent = '✏️ Editar';
@@ -523,7 +532,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // BOTÕES DE NAVEGAÇÃO
         if (backToAdminBtn) {
-            backToAdminBtn.addEventListener("click", function() {
+            backToAdminBtn.addEventListener("click", function () {
                 console.log("⬅️ Voltando para painel administrativo");
                 window.location.href = "admin_dashboard.html";
             });
@@ -654,7 +663,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (userTableBody) {
             userTableBody.addEventListener("click", (e) => {
                 const index = e.target.dataset.index;
-                
+
                 if (e.target.classList.contains("deleteBtn")) {
                     if (confirm("Deseja realmente excluir este usuário?")) {
                         users.splice(index, 1);
@@ -662,7 +671,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         renderTable(searchInput ? searchInput.value : "");
                     }
                 }
-                
+
                 if (e.target.classList.contains("editBtn")) {
                     const user = users[index];
                     criarModalEdicao(index, user);
@@ -684,7 +693,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // BOTÕES DE NAVEGAÇÃO
         if (backToAdminBtn) {
-            backToAdminBtn.addEventListener("click", function() {
+            backToAdminBtn.addEventListener("click", function () {
                 console.log("⬅️ Voltando para gerenciamento de usuários");
                 window.location.href = "crud_usuario.html";
             });
@@ -789,7 +798,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // Event listeners já configurados via onclick no HTML
     }
 
-        // ===== PÁGINA: GERENCIAR SESSÕES (CRUD) =====
+    // ===== PÁGINA: GERENCIAR SESSÕES (CRUD) =====
     if (currentPage === "crud_sessao.html") {
         console.log("🎭 Configurando Gerenciamento de Sessões");
 
@@ -825,7 +834,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // BOTÕES DE NAVEGAÇÃO
         if (backToAdminBtn) {
-            backToAdminBtn.addEventListener("click", function() {
+            backToAdminBtn.addEventListener("click", function () {
                 console.log("⬅️ Voltando para painel administrativo");
                 window.location.href = "admin_dashboard.html";
             });
@@ -841,7 +850,7 @@ document.addEventListener("DOMContentLoaded", function() {
         function carregarFilmesSelect() {
             const select = document.getElementById('filme');
             const movies = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FILMES)) || [];
-            
+
             select.innerHTML = '<option value="">Selecione um filme</option>';
             movies.forEach(movie => {
                 const option = document.createElement('option');
@@ -857,7 +866,7 @@ document.addEventListener("DOMContentLoaded", function() {
         function carregarSalasSelect() {
             const select = document.getElementById('sala');
             select.innerHTML = '<option value="">Selecione uma sala</option>';
-            
+
             salas.forEach(sala => {
                 const option = document.createElement('option');
                 option.value = sala.nome;
@@ -937,7 +946,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 row.insertCell(6).textContent = formatarStatusSessao(session.status) || "Não informado";
 
                 const actionsCell = row.insertCell(7);
-                
+
                 // Botão Editar
                 const editBtn = document.createElement('button');
                 editBtn.textContent = '✏️ Editar';
@@ -979,7 +988,7 @@ document.addEventListener("DOMContentLoaded", function() {
             isEditing = true;
             currentSessionId = index;
             document.getElementById('modalTitle').textContent = 'Editar Sessão';
-            
+
             // Preencher formulário com dados da sessão
             document.getElementById('filme').value = session.filme || "";
             document.getElementById('sala').value = session.sala || "";
@@ -987,7 +996,7 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById('horario').value = session.horario || "";
             document.getElementById('preco').value = session.preco || "";
             document.getElementById('status').value = session.status || "";
-            
+
             sessionModal.classList.remove('hidden');
         }
 
@@ -1034,7 +1043,7 @@ document.addEventListener("DOMContentLoaded", function() {
          */
         function validarSessao(sessaoData) {
             // Verificar conflito de horário
-            const conflito = sessions.find((s, index) => 
+            const conflito = sessions.find((s, index) =>
                 index !== currentSessionId &&
                 s.sala === sessaoData.sala &&
                 s.data === sessaoData.data &&
@@ -1152,18 +1161,168 @@ document.addEventListener("DOMContentLoaded", function() {
             // Fechar todos os modais
             if (sessionModal) sessionModal.classList.add('hidden');
             if (deleteModal) deleteModal.classList.add('hidden');
-            
+
             // Carregar dados
             carregarFilmesSelect();
             carregarSalasSelect();
             renderSessionTable();
-            
+
             console.log("✅ Página de sessões inicializada com sucesso");
         }
 
         // INICIALIZAR PÁGINA
         inicializarPagina();
     }
+
+    /* ================================
+   RELATÓRIO – PROGRAMAÇÃO POR PERÍODO
+   ================================ */
+
+    /**
+     * Constrói um objeto Date seguro a partir de "AAAA-MM-DD" + "HH:MM".
+     */
+    function construirData(dataStr, horarioStr) {
+        const [ano, mes, dia] = dataStr.split("-").map(Number);
+        const [hora, minuto] = horarioStr.split(":").map(Number);
+        return new Date(ano, mes - 1, dia, hora, minuto);
+    }
+
+    /**
+     * Função principal: carrega a programação dentro de um período.
+     */
+    function carregarProgramacaoPorPeriodo(dataInicio, dataFim) {
+        const container = document.getElementById("weekSchedule");
+        if (!container) return;
+
+        // Normalizar datas para início e fim do dia
+        const inicio = new Date(dataInicio);
+        inicio.setHours(0, 0, 0, 0);
+
+        const fim = new Date(dataFim);
+        fim.setHours(23, 59, 59, 999);
+
+        // Buscar sessões
+        const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
+
+        // Agrupar sessões por data (AAAA-MM-DD)
+        const grupos = {};
+
+        sessoes.forEach(sessao => {
+            const dataSessao = construirData(sessao.data, sessao.horario);
+
+            if (dataSessao >= inicio && dataSessao <= fim) {
+                if (!grupos[sessao.data]) grupos[sessao.data] = [];
+                grupos[sessao.data].push(sessao);
+            }
+        });
+
+        // Renderização
+        container.innerHTML = "";
+
+        const datasOrdenadas = Object.keys(grupos).sort();
+
+        if (datasOrdenadas.length === 0) {
+            container.innerHTML = `<p class="empty-day">Nenhuma sessão encontrada nesse período.</p>`;
+            return;
+        }
+
+        datasOrdenadas.forEach(data => {
+            const bloco = document.createElement("div");
+            bloco.classList.add("day-block");
+
+            const dataFormatada = new Date(data + "T00:00").toLocaleDateString("pt-BR");
+
+            bloco.innerHTML = `
+            <h3 class="day-title">${dataFormatada}</h3>
+            ${gerarTabelaDia(grupos[data])}
+        `;
+
+            container.appendChild(bloco);
+        });
+    }
+
+    /**
+     * Monta uma tabela com as sessões do dia.
+     */
+    function gerarTabelaDia(lista) {
+        return `
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Filme</th>
+                    <th>Sala</th>
+                    <th>Horário</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${lista.map(sess => `
+                    <tr>
+                        <td>${sess.filme}</td>
+                        <td>${sess.sala}</td>
+                        <td>${sess.horario}</td>
+                        <td>${formatarStatus(sess.status)}</td>
+                    </tr>
+                `).join("")}
+            </tbody>
+        </table>
+    `;
+    }
+
+    /**
+     * Converte status interno para texto amigável.
+     */
+    function formatarStatus(status) {
+        const map = {
+            aguardando: "Aguardando",
+            em_andamento: "Em andamento",
+            cancelada: "Cancelada"
+        };
+        return map[status] || status;
+    }
+
+    /**
+     * Inicialização
+     */
+    document.addEventListener("DOMContentLoaded", () => {
+        const filterBtn = document.getElementById("filterPeriodBtn");
+
+        filterBtn.addEventListener("click", () => {
+            const inicio = document.getElementById("inicio").value;
+            const fim = document.getElementById("fim").value;
+
+            if (!inicio || !fim) {
+                alert("Por favor, selecione a data inicial e final.");
+                return;
+            }
+
+            if (new Date(inicio) > new Date(fim)) {
+                alert("A data inicial não pode ser maior que a data final.");
+                return;
+            }
+
+            carregarProgramacaoPorPeriodo(inicio, fim);
+        });
+
+        // Exibir semana atual ao abrir
+        const hoje = new Date();
+        const primeiroDia = new Date(hoje);
+        primeiroDia.setDate(hoje.getDate() - hoje.getDay());
+
+        const ultimoDia = new Date(primeiroDia);
+        ultimoDia.setDate(primeiroDia.getDate() + 6);
+
+        // Preenche os inputs automaticamente com a semana atual
+        document.getElementById("inicio").value = primeiroDia.toISOString().split("T")[0];
+        document.getElementById("fim").value = ultimoDia.toISOString().split("T")[0];
+
+        carregarProgramacaoPorPeriodo(
+            primeiroDia.toISOString().split("T")[0],
+            ultimoDia.toISOString().split("T")[0]
+        );
+    });
+
+
 });
 
 // ===== INICIALIZAÇÃO GLOBAL =====

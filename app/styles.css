@@ -650,6 +650,45 @@ tr:last-child td {
   }
 }
 
+.week-schedule {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.day-block {
+    padding: 15px;
+    background: #ffffffd9;
+    border-radius: 12px;
+    box-shadow: 0 0 10px #0001;
+}
+
+.day-title {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table th {
+    background: #333;
+    color: #fff;
+    padding: 8px;
+}
+
+.report-table td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+.empty-day {
+    opacity: 0.6;
+    font-style: italic;
+}
+
 /* ===== EMOJIS ESPECÍFICOS POR PÁGINA ===== */
 .page-title[data-page="usuarios"]::before { content: "👥"; }
 .page-title[data-page="filmes"]::before { content: "🎬"; }
