@@ -7,34 +7,87 @@
     <title>🎭 Catálogo de Filmes - Sistema de Cinema</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-
 <body class="fade-in">
-    <!-- ===== CONTAINER PRINCIPAL ===== -->
-    <div class="container">
-        
-        <!-- ===== CABEÇALHO DA PÁGINA ===== -->
-        <div class="navigation-buttons">
-            <h1 class="page-title" data-page="cliente">🎭 Catálogo de Filmes</h1>
-            <button onclick="logout()" class="nav-btn logout">Sair do Sistema</button>
-        </div>
-
-        <!-- ===== MENSAGEM DE BOAS-VINDAS ===== -->
-        <div class="welcome-message">
-            <h2>🎉 Bem-vindo ao nosso catálogo!</h2>
-            <p>Confira abaixo todos os filmes disponíveis em nossa programação.</p>
-        </div>
-
-        <!-- ===== GRADE DE FILMES ===== -->
-        <div class="catalogo" id="catalogo">
-            <!-- ===== ÁREA DINÂMICA ===== -->
-            <!-- Os cards de filmes serão carregados aqui via JavaScript -->
-        </div>
-
-        <!-- ===== MENSAGEM DE ESTADO VAZIO ===== -->
-        <!-- Será exibida via JavaScript quando não houver filmes -->
+<!-- ===== CONTAINER PRINCIPAL ===== -->
+<div class="container">
+    <!-- ===== CABEÇALHO DA PÁGINA ===== -->
+    <div class="navigation-buttons">
+        <h1 class="page-title" data-page="cliente">🎭 Catálogo de Filmes</h1>
+        <button onclick="logout()" class="nav-btn logout">Sair do Sistema</button>
     </div>
 
-    <!-- ===== SCRIPTS DO SISTEMA ===== -->
-    <script src="script.js"></script>
+    <!-- ===== MENSAGEM DE BOAS-VINDAS ===== -->
+    <div class="welcome-message">
+        <h2>🎉 Bem-vindo ao nosso catálogo!</h2>
+        <p>Confira abaixo todos os filmes disponíveis em nossa programação.</p>
+    </div>
+
+    <!-- ===== GRADE DE FILMES ===== -->
+    <div class="catalogo" id="catalogo">
+        <!-- ===== ÁREA DINÂMICA ===== -->
+        <!-- Os cards de filmes serão carregados aqui via JavaScript -->
+    </div>
+
+    <!-- ===== MENSAGEM DE ESTADO VAZIO ===== -->
+    <!-- Será exibida via JavaScript quando não houver filmes -->
+</div>
+
+<!-- ===== MODAL DE COMPRA DE INGRESSOS ===== -->
+<div id="modalIngresso" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitulo">🎫 Comprar Ingresso</h2>
+            <button class="close-modal" onclick="fecharModalIngresso()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <!-- Informações do Filme -->
+            <div class="filme-info" id="filmeInfo">
+                <img id="modalCartaz" src="" alt="Cartaz do Filme">
+                <div class="filme-detalhes">
+                    <h3 id="modalFilmeTitulo"></h3>
+                    <p id="modalFilmeGenero"></p>
+                    <p id="modalFilmeDuracao"></p>
+                    <p id="modalFilmeClassificacao"></p>
+                </div>
+            </div>
+
+            <!-- Seleção de Sessão -->
+            <div class="sessao-selecao">
+                <h4>📅 Selecione a Sessão</h4>
+                <div id="listaSessoes" class="lista-sessoes">
+                    <!-- Sessões serão carregadas aqui -->
+                </div>
+            </div>
+
+            <!-- Seleção de Quantidade -->
+            <div class="quantidade-ingressos">
+                <h4>🎟️ Quantidade de Ingressos</h4>
+                <div class="quantidade-controls">
+                    <button class="qtd-btn" onclick="alterarQuantidade(-1)">-</button>
+                    <span id="quantidade" class="quantidade">1</span>
+                    <button class="qtd-btn" onclick="alterarQuantidade(1)">+</button>
+                </div>
+                <p class="preco-total">Total: <span id="precoTotal">R$ 0,00</span></p>
+            </div>
+
+            <!-- Informações da Compra -->
+            <div class="resumo-compra">
+                <h4>📋 Resumo da Compra</h4>
+                <div id="resumoCompra" class="resumo-detalhes">
+                    <!-- Resumo será preenchido dinamicamente -->
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="fecharModalIngresso()">Cancelar</button>
+            <button class="btn-primary" onclick="finalizarCompra()">Finalizar Compra</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SCRIPTS DO SISTEMA ===== -->
+<script src="script.js"></script>
 </body>
 </html>

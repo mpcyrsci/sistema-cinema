@@ -749,14 +749,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ===== PÁGINA: CATÁLOGO CLIENTE =====
+    // ===== PÁGINA: CATÁLOGO CLIENTE =====
     if (currentPage === "cliente.html") {
         console.log("🎭 Configurando Catálogo para Clientes");
+
+        // Variáveis para controle do modal
+        let filmeSelecionado = null;
+        let sessaoSelecionada = null;
+        let quantidadeIngressos = 1;
+        let sessoesDisponiveis = [];
 
         /**
          * Carrega catálogo de filmes para clientes
          */
         function carregarCatalogoCliente() {
             const movies = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FILMES)) || [];
+            const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
             const catalogo = document.getElementById("catalogo");
 
             if (!catalogo) return;
@@ -765,31 +773,550 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (movies.length === 0) {
                 catalogo.innerHTML = `
-                    <div class="empty-state">
-                        <h3>🎭 Nenhum filme disponível</h3>
-                        <p>Volte mais tarde para conferir nossa programação!</p>
-                    </div>
-                `;
+                <div class="empty-state">
+                    <h3>🎭 Nenhum filme disponível</h3>
+                    <p>Volte mais tarde para conferir nossa programação!</p>
+                </div>
+            `;
                 return;
             }
 
             movies.forEach(movie => {
+                // Verificar se há sessões disponíveis para este filme
+                const sessoesFilme = sessoes.filter(sessao =>
+                    sessao.filme === movie.titulo &&
+                    sessao.status === 'aguardando'
+                );
+
                 const card = document.createElement("div");
                 card.className = "filme-card";
                 card.innerHTML = `
-                    <img src="${movie.cartaz || 'placeholder.jpg'}" alt="${movie.titulo}" onerror="this.src='placeholder.jpg'">
-                    <h3>${movie.titulo || "Sem título"}</h3>
-                    <p><strong>🏷️ Gênero:</strong> ${movie.genero || "Não informado"}</p>
-                    <p><strong>⏱️ Duração:</strong> ${movie.duracao || "Não informada"} min</p>
-                    <p><strong>📊 Classificação:</strong> ${movie.classificacao || "L"}</p>
-                    <p><strong>📈 Status:</strong> ${movie.status || "Em Breve"}</p>
-                    <p class="sinopse">${movie.sinopse || "Sinopse não disponível"}</p>
-                `;
+                <img src="${movie.cartaz || 'placeholder.jpg'}" alt="${movie.titulo}" onerror="this.src='placeholder.jpg'">
+                <h3>${movie.titulo || "Sem título"}</h3>
+                <p><strong>🏷️ Gênero:</strong> ${movie.genero || "Não informado"}</p>
+                <p><strong>⏱️ Duração:</strong> ${movie.duracao || "Não informada"} min</p>
+                <p><strong>📊 Classificação:</strong> ${movie.classificacao || "L"}</p>
+                <p><strong>📈 Status:</strong> ${movie.status || "Em Breve"}</p>
+                <p class="sinopse">${movie.sinopse || "Sinopse não disponível"}</p>
+                <div class="sessoes-info">
+                    <p><strong>🎭 Sessões disponíveis:</strong> ${sessoesFilme.length}</p>
+                </div>
+                ${sessoesFilme.length > 0 ?
+                    `<button class="btn-comprar" onclick="abrirModalIngresso('${movie.titulo}')">
+                         🎫 Comprar Ingresso
+                     </button>` :
+                    '<p class="sem-sessoes">⏳ Aguardando novas sessões</p>'
+                }
+            `;
                 catalogo.appendChild(card);
             });
         }
 
+        /**
+         * Abre modal para compra de ingresso
+         */
+        window.abrirModalIngresso = function(tituloFilme) {
+            const movies = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FILMES)) || [];
+            const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
+
+            // Encontrar filme selecionado
+            filmeSelecionado = movies.find(movie => movie.titulo === tituloFilme);
+            if (!filmeSelecionado) return;
+
+            // Filtrar sessões disponíveis para este filme
+            sessoesDisponiveis = sessoes.filter(sessao =>
+                sessao.filme === tituloFilme &&
+                sessao.status === 'aguardando'
+            );
+
+            // Preencher informações do filme no modal
+            document.getElementById('modalFilmeTitulo').textContent = filmeSelecionado.titulo;
+            document.getElementById('modalFilmeGenero').textContent = `Gênero: ${filmeSelecionado.genero}`;
+            document.getElementById('modalFilmeDuracao').textContent = `Duração: ${filmeSelecionado.duracao} min`;
+            document.getElementById('modalFilmeClassificacao').textContent = `Classificação: ${filmeSelecionado.classificacao}`;
+            document.getElementById('modalCartaz').src = filmeSelecionado.cartaz || 'placeholder.jpg';
+            document.getElementById('modalCartaz').alt = filmeSelecionado.titulo;
+
+            // Carregar lista de sessões
+            carregarListaSessoes();
+
+            // Resetar quantidade
+            quantidadeIngressos = 1;
+            atualizarQuantidade();
+
+            // Abrir modal
+            document.getElementById('modalIngresso').classList.remove('hidden');
+        }
+
+        /**
+         * Carrega lista de sessões disponíveis
+         */
+        function carregarListaSessoes() {
+            const listaSessoes = document.getElementById('listaSessoes');
+            listaSessoes.innerHTML = '';
+
+            if (sessoesDisponiveis.length === 0) {
+                listaSessoes.innerHTML = '<p class="sem-sessoes">Nenhuma sessão disponível</p>';
+                return;
+            }
+
+            sessoesDisponiveis.forEach((sessao, index) => {
+                const sessaoElement = document.createElement('div');
+                sessaoElement.className = `sessao-item ${sessaoSelecionada === index ? 'selecionada' : ''}`;
+                sessaoElement.innerHTML = `
+                <div class="sessao-info">
+                    <strong>📍 ${sessao.sala}</strong>
+                    <span>📅 ${formatarDataSessao(sessao.data)}</span>
+                    <span>🕒 ${sessao.horario}</span>
+                    <span>💰 R$ ${sessao.preco.toFixed(2).replace('.', ',')}</span>
+                </div>
+            `;
+                sessaoElement.onclick = () => selecionarSessao(index);
+                listaSessoes.appendChild(sessaoElement);
+            });
+        }
+
+        /**
+         * Seleciona uma sessão
+         */
+        function selecionarSessao(index) {
+            sessaoSelecionada = index;
+            carregarListaSessoes();
+            atualizarResumoCompra();
+        }
+
+        /**
+         * Formata data da sessão
+         */
+        function formatarDataSessao(dataString) {
+            if (!dataString) return "";
+            const [ano, mes, dia] = dataString.split('-');
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        /**
+         * Altera quantidade de ingressos
+         */
+        window.alterarQuantidade = function(alteracao) {
+            const novaQuantidade = quantidadeIngressos + alteracao;
+            if (novaQuantidade >= 1 && novaQuantidade <= 10) {
+                quantidadeIngressos = novaQuantidade;
+                atualizarQuantidade();
+                atualizarResumoCompra();
+            }
+        }
+
+        /**
+         * Atualiza display da quantidade
+         */
+        function atualizarQuantidade() {
+            document.getElementById('quantidade').textContent = quantidadeIngressos;
+        }
+
+        /**
+         * Atualiza resumo da compra
+         */
+        function atualizarResumoCompra() {
+            const resumoCompra = document.getElementById('resumoCompra');
+            const precoTotal = document.getElementById('precoTotal');
+
+            if (sessaoSelecionada === null) {
+                resumoCompra.innerHTML = '<p>Selecione uma sessão para ver o resumo</p>';
+                precoTotal.textContent = 'R$ 0,00';
+                return;
+            }
+
+            const sessao = sessoesDisponiveis[sessaoSelecionada];
+            const total = sessao.preco * quantidadeIngressos;
+
+            resumoCompra.innerHTML = `
+            <div class="resumo-item">
+                <span>Filme:</span>
+                <span>${filmeSelecionado.titulo}</span>
+            </div>
+            <div class="resumo-item">
+                <span>Sessão:</span>
+                <span>${formatarDataSessao(sessao.data)} - ${sessao.horario}</span>
+            </div>
+            <div class="resumo-item">
+                <span>Sala:</span>
+                <span>${sessao.sala}</span>
+            </div>
+            <div class="resumo-item">
+                <span>Ingressos:</span>
+                <span>${quantidadeIngressos} x R$ ${sessao.preco.toFixed(2).replace('.', ',')}</span>
+            </div>
+        `;
+
+            precoTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
+
+        /**
+         * Fecha modal de ingresso
+         */
+        window.fecharModalIngresso = function() {
+            document.getElementById('modalIngresso').classList.add('hidden');
+            filmeSelecionado = null;
+            sessaoSelecionada = null;
+            quantidadeIngressos = 1;
+        }
+
+        /**
+         * Finaliza a compra do ingresso
+         */
+        window.finalizarCompra = function() {
+            if (sessaoSelecionada === null) {
+                alert('Por favor, selecione uma sessão!');
+                return;
+            }
+
+            const sessao = sessoesDisponiveis[sessaoSelecionada];
+            const total = sessao.preco * quantidadeIngressos;
+
+            // Simular processamento da compra
+            const compra = {
+                id: Date.now(),
+                filme: filmeSelecionado.titulo,
+                sessao: sessao,
+                quantidade: quantidadeIngressos,
+                total: total,
+                dataCompra: new Date().toISOString(),
+                status: 'confirmada'
+            };
+
+            // Salvar compra no localStorage (em um sistema real, isso seria enviado para um backend)
+            const compras = JSON.parse(localStorage.getItem('compras')) || [];
+            compras.push(compra);
+            localStorage.setItem('compras', JSON.stringify(compras));
+
+            alert(`🎉 Compra realizada com sucesso!\n\n` +
+                `Filme: ${filmeSelecionado.titulo}\n` +
+                `Sessão: ${formatarDataSessao(sessao.data)} - ${sessao.horario}\n` +
+                `Sala: ${sessao.sala}\n` +
+                `Ingressos: ${quantidadeIngressos}\n` +
+                `Total: R$ ${total.toFixed(2).replace('.', ',')}`);
+
+            fecharModalIngresso();
+        }
+
+        // Carregar catálogo inicial
         carregarCatalogoCliente();
+    }
+// ===== PÁGINA: RELATÓRIO DE VENDAS =====
+    if (currentPage === "relatorio_vendas.html") {
+        console.log("💰 Configurando Relatório de Vendas");
+
+        const inicioInput = document.getElementById('inicio');
+        const fimInput = document.getElementById('fim');
+        const filterPeriodBtn = document.getElementById('filterPeriodBtn');
+        const backToAdminBtn = document.getElementById('backToAdminBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const resumoGeral = document.getElementById('resumoGeral');
+        const vendasPorFilme = document.getElementById('vendasPorFilme');
+        const detalhesVendas = document.getElementById('detalhesVendas');
+
+        // BOTÕES DE NAVEGAÇÃO
+        if (backToAdminBtn) {
+            backToAdminBtn.addEventListener("click", function () {
+                console.log("⬅️ Voltando para painel administrativo");
+                window.location.href = "admin_dashboard.html";
+            });
+        }
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", logout);
+        }
+
+        /**
+         * Formata data no padrão DD/MM/AAAA
+         */
+        function formatarDataVendas(dataString) {
+            if (!dataString) return "";
+            const [ano, mes, dia] = dataString.split('-');
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        /**
+         * Formata valor monetário no padrão brasileiro
+         */
+        function formatarValor(valor) {
+            return `R$ ${valor.toFixed(2).replace('.', ',')}`;
+        }
+
+        /**
+         * Obtém a data de início do mês atual
+         */
+        function getInicioMes() {
+            const hoje = new Date();
+            const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            return inicioMes.toISOString().split('T')[0];
+        }
+
+        /**
+         * Obtém a data de hoje
+         */
+        function getHoje() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        /**
+         * Calcula métricas gerais das vendas
+         */
+        function calcularMetricasVendas(comprasFiltradas) {
+            const totalVendas = comprasFiltradas.length;
+            const totalReceita = comprasFiltradas.reduce((sum, compra) => sum + compra.total, 0);
+            const totalIngressos = comprasFiltradas.reduce((sum, compra) => sum + compra.quantidade, 0);
+            const ticketMedio = totalVendas > 0 ? totalReceita / totalVendas : 0;
+
+            return {
+                totalVendas,
+                totalReceita,
+                totalIngressos,
+                ticketMedio
+            };
+        }
+
+        /**
+         * Agrupa vendas por filme
+         */
+        function agruparVendasPorFilme(comprasFiltradas) {
+            const vendasPorFilme = {};
+
+            comprasFiltradas.forEach(compra => {
+                const filme = compra.filme;
+                if (!vendasPorFilme[filme]) {
+                    vendasPorFilme[filme] = {
+                        filme: filme,
+                        totalVendas: 0,
+                        totalReceita: 0,
+                        totalIngressos: 0,
+                        compras: []
+                    };
+                }
+
+                vendasPorFilme[filme].totalVendas++;
+                vendasPorFilme[filme].totalReceita += compra.total;
+                vendasPorFilme[filme].totalIngressos += compra.quantidade;
+                vendasPorFilme[filme].compras.push(compra);
+            });
+
+            // Ordenar por receita (maior primeiro)
+            return Object.values(vendasPorFilme).sort((a, b) => b.totalReceita - a.totalReceita);
+        }
+
+        /**
+         * Renderiza o resumo geral
+         */
+        function renderResumoGeral(metricas, dataInicio, dataFim) {
+            resumoGeral.innerHTML = `
+            <div class="resumo-header">
+                <h3>📈 Resumo Geral</h3>
+                <span class="periodo">Período: ${formatarDataVendas(dataInicio)} a ${formatarDataVendas(dataFim)}</span>
+            </div>
+            <div class="metricas-grid">
+                <div class="metrica-card">
+                    <div class="metrica-icon">💰</div>
+                    <div class="metrica-info">
+                        <span class="metrica-valor">${formatarValor(metricas.totalReceita)}</span>
+                        <span class="metrica-label">Receita Total</span>
+                    </div>
+                </div>
+                <div class="metrica-card">
+                    <div class="metrica-icon">🎟️</div>
+                    <div class="metrica-info">
+                        <span class="metrica-valor">${metricas.totalVendas}</span>
+                        <span class="metrica-label">Total de Vendas</span>
+                    </div>
+                </div>
+                <div class="metrica-card">
+                    <div class="metrica-icon">📊</div>
+                    <div class="metrica-info">
+                        <span class="metrica-valor">${metricas.totalIngressos}</span>
+                        <span class="metrica-label">Ingressos Vendidos</span>
+                    </div>
+                </div>
+                <div class="metrica-card">
+                    <div class="metrica-icon">📈</div>
+                    <div class="metrica-info">
+                        <span class="metrica-valor">${formatarValor(metricas.ticketMedio)}</span>
+                        <span class="metrica-label">Ticket Médio</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        }
+
+        /**
+         * Renderiza vendas por filme
+         */
+        function renderVendasPorFilme(vendasAgrupadas) {
+            if (vendasAgrupadas.length === 0) {
+                vendasPorFilme.innerHTML = `
+                <div class="empty-state">
+                    <h3>📭 Nenhuma venda encontrada</h3>
+                    <p>Não há vendas no período selecionado.</p>
+                </div>
+            `;
+                return;
+            }
+
+            vendasPorFilme.innerHTML = `
+            <div class="vendas-header">
+                <h3>🎬 Vendas por Filme</h3>
+                <span class="total-filmes">${vendasAgrupadas.length} filme(s)</span>
+            </div>
+            <div class="filmes-grid">
+                ${vendasAgrupadas.map(filme => `
+                    <div class="filme-venda-card">
+                        <div class="filme-header">
+                            <h4>${filme.filme}</h4>
+                            <span class="receita-filme">${formatarValor(filme.totalReceita)}</span>
+                        </div>
+                        <div class="filme-metricas">
+                            <div class="filme-metrica">
+                                <span class="label">Vendas:</span>
+                                <span class="valor">${filme.totalVendas}</span>
+                            </div>
+                            <div class="filme-metrica">
+                                <span class="label">Ingressos:</span>
+                                <span class="valor">${filme.totalIngressos}</span>
+                            </div>
+                            <div class="filme-metrica">
+                                <span class="label">Receita Média:</span>
+                                <span class="valor">${formatarValor(filme.totalReceita / filme.totalVendas)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        }
+
+        /**
+         * Renderiza detalhes das vendas
+         */
+        function renderDetalhesVendas(comprasFiltradas) {
+            if (comprasFiltradas.length === 0) {
+                detalhesVendas.innerHTML = '';
+                return;
+            }
+
+            // Ordenar por data (mais recente primeiro)
+            comprasFiltradas.sort((a, b) => new Date(b.dataCompra) - new Date(a.dataCompra));
+
+            detalhesVendas.innerHTML = `
+            <div class="detalhes-header">
+                <h3>📋 Detalhes das Vendas</h3>
+                <span class="total-vendas">${comprasFiltradas.length} venda(s)</span>
+            </div>
+            <div class="vendas-table-container">
+                <table class="vendas-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Data</th>
+                            <th>Filme</th>
+                            <th>Sessão</th>
+                            <th>Sala</th>
+                            <th>Ingressos</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${comprasFiltradas.map(compra => {
+                const dataCompra = new Date(compra.dataCompra);
+                const dataFormatada = dataCompra.toLocaleDateString('pt-BR');
+                const horaFormatada = dataCompra.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `
+                                <tr>
+                                    <td>#${compra.id.toString().slice(-6)}</td>
+                                    <td>${dataFormatada}<br><small>${horaFormatada}</small></td>
+                                    <td>${compra.filme}</td>
+                                    <td>${compra.sessao.horario}</td>
+                                    <td>${compra.sessao.sala}</td>
+                                    <td>${compra.quantidade}</td>
+                                    <td class="valor-destaque">${formatarValor(compra.total)}</td>
+                                    <td><span class="status-badge ${compra.status}">${compra.status}</span></td>
+                                </tr>
+                            `;
+            }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        }
+
+        /**
+         * Renderiza o relatório completo
+         */
+        function renderRelatorioVendas(dataInicio, dataFim) {
+            const compras = JSON.parse(localStorage.getItem('compras')) || [];
+
+            // Filtrar compras pelo período
+            const comprasFiltradas = compras.filter(compra => {
+                const dataCompra = compra.dataCompra.split('T')[0];
+                return dataCompra >= dataInicio && dataCompra <= dataFim;
+            });
+
+            // Calcular métricas
+            const metricas = calcularMetricasVendas(comprasFiltradas);
+
+            // Agrupar por filme
+            const vendasAgrupadas = agruparVendasPorFilme(comprasFiltradas);
+
+            // Renderizar todas as seções
+            renderResumoGeral(metricas, dataInicio, dataFim);
+            renderVendasPorFilme(vendasAgrupadas);
+            renderDetalhesVendas(comprasFiltradas);
+        }
+
+        /**
+         * Aplica o filtro de período
+         */
+        function aplicarFiltro() {
+            const dataInicio = inicioInput.value;
+            const dataFim = fimInput.value;
+
+            if (!dataInicio || !dataFim) {
+                alert('Por favor, selecione ambas as datas (início e fim)');
+                return;
+            }
+
+            if (dataInicio > dataFim) {
+                alert('A data inicial não pode ser maior que a data final');
+                return;
+            }
+
+            renderRelatorioVendas(dataInicio, dataFim);
+        }
+
+        // EVENT LISTENERS
+        if (filterPeriodBtn) {
+            filterPeriodBtn.addEventListener('click', aplicarFiltro);
+        }
+
+        // INICIALIZAÇÃO
+        function inicializarRelatorioVendas() {
+            // Definir datas padrão (mês atual)
+            const inicioMes = getInicioMes();
+            const hoje = getHoje();
+
+            if (inicioInput) inicioInput.value = inicioMes;
+            if (fimInput) fimInput.value = hoje;
+
+            // Renderizar relatório inicial
+            renderRelatorioVendas(inicioMes, hoje);
+
+            console.log("✅ Relatório de vendas inicializado com sucesso");
+        }
+
+        // INICIALIZAR PÁGINA
+        inicializarRelatorioVendas();
     }
 
     // ===== PÁGINA: LOGIN =====

@@ -9,83 +9,94 @@
 </head>
 
 <body class="fade-in">
-    <!-- ===== CONTAINER PRINCIPAL ===== -->
-    <div class="container">
-        
-        <!-- ===== CABEÇALHO DE NAVEGAÇÃO ===== -->
-        <div class="navigation-buttons">
-            <h1 class="page-title" data-page="admin">⚙️ Painel Administrativo</h1>
-            <button id="logoutBtn" class="nav-btn logout">Sair do Sistema</button>
-        </div>
+<!-- ===== CONTAINER PRINCIPAL ===== -->
+<div class="container">
 
-        <!-- ===== CONTEÚDO PRINCIPAL ===== -->
-        <main class="dashboard-container">
-            
-            <!-- ===== MENSAGEM DE BOAS-VINDAS ===== -->
-            <div class="welcome-message">
-                <h2>👋 Bem-vindo, Administrador!</h2>
-                <p>Selecione abaixo o que deseja gerenciar em nosso sistema:</p>
-            </div>
-
-            <!-- ===== OPÇÕES DO DASHBOARD ===== -->
-            <div class="dashboard-options">
-                
-                <!-- ===== CARD: GERENCIAR USUÁRIOS ===== -->
-                <div class="dashboard-card">
-                    <div class="card-icon">👥</div>
-                    <h3>Gerenciar Usuários</h3>
-                    <p>Cadastre, edite, visualize ou remova usuários do sistema. 
-                       Controle perfis de acesso e status dos usuários.</p>
-                    <button onclick="window.location.href='crud_usuario.html'" class="card-btn">
-                        Acessar
-                    </button>
-                </div>
-
-                <!-- ===== CARD: GERENCIAR FILMES ===== -->
-                <div class="dashboard-card">
-                    <div class="card-icon">🎞️</div>
-                    <h3>Gerenciar Filmes</h3>
-                    <p>Adicione novos filmes, edite informações, gerencie o catálogo 
-                       e controle a programação do cinema.</p>
-                    <button onclick="window.location.href='crud_filme.html'" class="card-btn">
-                        Acessar
-                    </button>
-                </div>
-
-                <!-- ===== CARD: GERENCIAR SESSÕES ===== -->
-                <div class="dashboard-card">
-                    <div class="card-icon">🎭</div>
-                    <h3>Gerenciar Sessões</h3>
-                    <p>Configure horários, salas e disponibilidade das sessões. 
-                       Gerencie a programação de exibição dos filmes.</p>
-                    <button onclick="window.location.href='crud_sessao.html'" class="card-btn">
-                        Acessar
-                    </button>
-                </div>
-
-                <!-- ===== CARD: RELATÓRIO – PROGRAMAÇÃO POR PERÍODO ===== -->
-                <div class="dashboard-card">
-                    <div class="card-icon">📅</div>
-                    <h3>Programação por Período</h3>
-                    <p>Veja todas as sessões organizadas por dia, horário, sala e filme.
-                    Relatório voltado para planejamento da equipe.</p>
-                    <button onclick="window.location.href='relatorio_programacao.html'" class="card-btn">
-                        Acessar
-                    </button>
-                </div>
-            </div>
-        </main>
+    <!-- ===== CABEÇALHO DE NAVEGAÇÃO ===== -->
+    <div class="navigation-buttons">
+        <h1 class="page-title" data-page="admin">⚙️ Painel Administrativo</h1>
+        <button id="logoutBtn" class="nav-btn logout">Sair do Sistema</button>
     </div>
 
-    <!-- ===== SCRIPTS DO SISTEMA ===== -->
-    <script>
-        // Função para logout
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            if (confirm('Tem certeza que deseja sair do sistema?')) {
-                // Redirecionar para a página de login
-                window.location.href = 'login.html';
-            }
-        });
-    </script>
+    <!-- ===== CONTEÚDO PRINCIPAL ===== -->
+    <main class="dashboard-container">
+
+        <!-- ===== MENSAGEM DE BOAS-VINDAS ===== -->
+        <div class="welcome-message">
+            <h2>👋 Bem-vindo, Administrador!</h2>
+            <p>Selecione abaixo o que deseja gerenciar em nosso sistema:</p>
+        </div>
+
+        <!-- ===== OPÇÕES DO DASHBOARD ===== -->
+        <div class="dashboard-options">
+
+            <!-- ===== CARD: GERENCIAR USUÁRIOS ===== -->
+            <div class="dashboard-card">
+                <div class="card-icon">👥</div>
+                <h3>Gerenciar Usuários</h3>
+                <p>Cadastre, edite, visualize ou remova usuários do sistema.
+                    Controle perfis de acesso e status dos usuários.</p>
+                <button onclick="window.location.href='crud_usuario.html'" class="card-btn">
+                    Acessar
+                </button>
+            </div>
+
+            <!-- ===== CARD: GERENCIAR FILMES ===== -->
+            <div class="dashboard-card">
+                <div class="card-icon">🎞️</div>
+                <h3>Gerenciar Filmes</h3>
+                <p>Adicione novos filmes, edite informações, gerencie o catálogo
+                    e controle a programação do cinema.</p>
+                <button onclick="window.location.href='crud_filme.html'" class="card-btn">
+                    Acessar
+                </button>
+            </div>
+
+            <!-- ===== CARD: GERENCIAR SESSÕES ===== -->
+            <div class="dashboard-card">
+                <div class="card-icon">🎭</div>
+                <h3>Gerenciar Sessões</h3>
+                <p>Configure horários, salas e disponibilidade das sessões.
+                    Gerencie a programação de exibição dos filmes.</p>
+                <button onclick="window.location.href='crud_sessao.html'" class="card-btn">
+                    Acessar
+                </button>
+            </div>
+
+            <!-- ===== CARD: RELATÓRIO – PROGRAMAÇÃO POR PERÍODO ===== -->
+            <div class="dashboard-card">
+                <div class="card-icon">📅</div>
+                <h3>Programação por Período</h3>
+                <p>Veja todas as sessões organizadas por dia, horário, sala e filme.
+                    Relatório voltado para planejamento da equipe.</p>
+                <button onclick="window.location.href='relatorio_programacao.html'" class="card-btn">
+                    Acessar
+                </button>
+            </div>
+
+            <!-- ===== CARD: RELATÓRIO – VENDAS POR PERÍODO ===== -->
+            <div class="dashboard-card">
+                <div class="card-icon">💰</div>
+                <h3>Relatório de Vendas</h3>
+                <p>Analise o desempenho comercial por período, filmes mais vendidos,
+                    receita total e métricas de vendas.</p>
+                <button onclick="window.location.href='relatorio_vendas.html'" class="card-btn">
+                    Acessar
+                </button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ===== SCRIPTS DO SISTEMA ===== -->
+<script>
+    // Função para logout
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        if (confirm('Tem certeza que deseja sair do sistema?')) {
+            // Redirecionar para a página de login
+            window.location.href = 'index.html';
+        }
+    });
+</script>
 </body>
 </html>
