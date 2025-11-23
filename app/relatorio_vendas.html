@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Relatório de Vendas por Período</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="fade-in">
+<div class="container">
+
+    <!-- CABEÇALHO -->
+    <div class="navigation-buttons">
+        <button id="backToAdminBtn" class="nav-btn back-btn">⬅️ Voltar ao Painel</button>
+        <button id="logoutBtn" class="nav-btn logout">Sair do Sistema</button>
+    </div>
+
+    <h2 class="page-title">💰 Relatório de Vendas por Período</h2>
+    <p style="margin-bottom: 15px; opacity: 0.8;">
+        Análise detalhada das vendas de ingressos, receita e desempenho por período.
+    </p>
+
+    <!-- SELETOR DE PERÍODO -->
+    <div class="period-selector">
+        <h3>Selecionar Período</h3>
+
+        <div class="period-inputs">
+            <div class="input-group">
+                <label for="inicio">Data inicial:</label>
+                <input type="date" id="inicio">
+            </div>
+
+            <div class="input-group">
+                <label for="fim">Data final:</label>
+                <input type="date" id="fim">
+            </div>
+
+            <button id="filterPeriodBtn" class="filter-btn">Filtrar</button>
+        </div>
+    </div>
+
+    <!-- RESUMO GERAL -->
+    <div id="resumoGeral" class="resumo-geral">
+        <!-- Conteúdo preenchido via script.js -->
+    </div>
+
+    <!-- VENDAS POR FILME -->
+    <div id="vendasPorFilme" class="vendas-por-filme">
+        <!-- Conteúdo preenchido via script.js -->
+    </div>
+
+    <!-- DETALHES DAS VENDAS -->
+    <div id="detalhesVendas" class="detalhes-vendas">
+        <!-- Conteúdo preenchido via script.js -->
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+    // Voltar ao painel
+    document.getElementById("backToAdminBtn").addEventListener("click", () => {
+        window.location.href = "admin_dashboard.html";
+    });
+
+    // Logout unificado
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+        if (confirm("Tem certeza que deseja sair?")) {
+            window.location.href = "index.html";
+        }
+    });
+</script>
+</body>
+</html>
