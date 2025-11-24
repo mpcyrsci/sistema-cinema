@@ -57,9 +57,6 @@ function cadastrar() {
 /**
  * Realiza o login no sistema
  */
-/**
- * Realiza o login no sistema
- */
 function login() {
     const email = document.getElementById("loginEmail").value;
     const senha = document.getElementById("loginSenha").value;
@@ -78,7 +75,9 @@ function login() {
     const todosUsuarios = [...usuarios, ...users];
 
     // Buscar usuário correspondente
-    const usuario = todosUsuarios.find(u => u.email === email && u.senha === senha || u.email === email && u.password === senha);
+    const usuario = todosUsuarios.find(u =>
+        u.email === email && (u.senha === senha || u.password === senha)
+    );
 
     if (usuario) {
         localStorage.setItem(CONFIG.STORAGE_KEYS.USUARIO_LOGADO, JSON.stringify(usuario));
@@ -184,6 +183,85 @@ function mostrarSecao(secao) {
     const tabAlvo = document.querySelector(`.tab[onclick*='${secao}']`);
     if (tabAlvo) tabAlvo.classList.add("active");
 }
+
+// ===== FUNÇÃO PARA CRIAR DADOS DE TESTE =====
+window.criarDadosTeste = function() {
+    console.log("🎬 Criando dados de teste...");
+
+    const filmes = [
+        {
+            titulo: "Avatar: O Caminho da Água",
+            genero: "Ficção Científica, Aventura",
+            duracao: "192",
+            classificacao: "12",
+            sinopse: "Sequência do famoso filme de James Cameron sobre Pandora",
+            dataEstreia: "2023-12-15",
+            cartaz: "", // VAZIO - usará imagem padrão
+            status: "Em Cartaz"
+        },
+        {
+            titulo: "Homem-Aranha: Através do Aranhaverso",
+            genero: "Animação, Ação",
+            duracao: "140",
+            classificacao: "10",
+            sinopse: "Continuação das aventuras do Miles Morales no multiverso",
+            dataEstreia: "2023-06-01",
+            cartaz: "", // VAZIO - usará imagem padrão
+            status: "Em Cartaz"
+        },
+        {
+            titulo: "Oppenheimer",
+            genero: "Drama, Histórico",
+            duracao: "180",
+            classificacao: "14",
+            sinopse: "A história do pai da bomba atômica",
+            dataEstreia: "2023-07-20",
+            cartaz: "", // VAZIO - usará imagem padrão
+            status: "Em Cartaz"
+        }
+    ];
+
+    localStorage.setItem("movies", JSON.stringify(filmes));
+
+    const sessoes = [
+        {
+            filme: "Avatar: O Caminho da Água",
+            sala: "Sala 1 - 2D",
+            data: "2024-01-20",
+            horario: "14:00",
+            preco: 25.00,
+            status: "aguardando"
+        },
+        {
+            filme: "Avatar: O Caminho da Água",
+            sala: "Sala 3 - IMAX",
+            data: "2024-01-20",
+            horario: "19:30",
+            preco: 35.00,
+            status: "aguardando"
+        },
+        {
+            filme: "Homem-Aranha: Através do Aranhaverso",
+            sala: "Sala 2 - 3D",
+            data: "2024-01-20",
+            horario: "16:15",
+            preco: 30.00,
+            status: "aguardando"
+        }
+    ];
+
+    localStorage.setItem("sessoes", JSON.stringify(sessoes));
+
+    console.log("✅ Dados de teste criados com sucesso!");
+    console.log("💡 Recarregue a página (F5) para ver os resultados");
+
+    // Recarregar automaticamente se estiver na página do cliente
+    if (window.location.pathname.includes('cliente.html')) {
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+};
 
 // ===== SISTEMA DE EVENT LISTENERS POR PÁGINA =====
 
@@ -349,7 +427,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (editIndex !== null) {
                 movies[editIndex] = movieData;
                 localStorage.removeItem(CONFIG.STORAGE_KEYS.EDIT_INDEX);
-                // alert("🎉 Filme atualizado com sucesso!");
             } else {
                 movies.push(movieData);
                 alert("🎉 Filme cadastrado com sucesso!");
@@ -749,20 +826,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ===== PÁGINA: CATÁLOGO CLIENTE =====
-    // ===== PÁGINA: CATÁLOGO CLIENTE =====
     if (currentPage === "cliente.html") {
-        console.log("🎭 Configurando Catálogo para Clientes");
+        console.log("🎭 Configurando Catálogo para Clientes - Script Principal");
 
-        // Variáveis para controle do modal
-        let filmeSelecionado = null;
-        let sessaoSelecionada = null;
-        let quantidadeIngressos = 1;
-        let sessoesDisponiveis = [];
-
-        /**
-         * Carrega catálogo de filmes para clientes
-         */
-        function carregarCatalogoCliente() {
+        // Esta função só será usada se o código específico da página não carregar
+        function carregarCatalogoFallback() {
+            console.log("🔄 Usando fallback do script principal...");
             const movies = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FILMES)) || [];
             const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
             const catalogo = document.getElementById("catalogo");
@@ -773,236 +842,60 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (movies.length === 0) {
                 catalogo.innerHTML = `
-                <div class="empty-state">
-                    <h3>🎭 Nenhum filme disponível</h3>
-                    <p>Volte mais tarde para conferir nossa programação!</p>
-                </div>
-            `;
+                    <div class="empty-state">
+                        <h3>🎭 Nenhum filme disponível</h3>
+                        <p>Volte mais tarde para conferir nossa programação!</p>
+                    </div>
+                `;
                 return;
             }
 
             movies.forEach(movie => {
-                // Verificar se há sessões disponíveis para este filme
                 const sessoesFilme = sessoes.filter(sessao =>
-                    sessao.filme === movie.titulo &&
-                    sessao.status === 'aguardando'
+                    sessao.filme === movie.titulo && sessao.status === 'aguardando'
                 );
 
                 const card = document.createElement("div");
                 card.className = "filme-card";
+
+                const cartazSrc = movie.cartaz && movie.cartaz.trim() !== '' ?
+                    movie.cartaz : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDMwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0NTAiIGZpbGw9IiMzMzMzMzMiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiI+U2VtIEltYWdlbTwvdGV4dD48L3N2Zz4=';
+
                 card.innerHTML = `
-                <img src="${movie.cartaz || 'placeholder.jpg'}" alt="${movie.titulo}" onerror="this.src='placeholder.jpg'">
-                <h3>${movie.titulo || "Sem título"}</h3>
-                <p><strong>🏷️ Gênero:</strong> ${movie.genero || "Não informado"}</p>
-                <p><strong>⏱️ Duração:</strong> ${movie.duracao || "Não informada"} min</p>
-                <p><strong>📊 Classificação:</strong> ${movie.classificacao || "L"}</p>
-                <p><strong>📈 Status:</strong> ${movie.status || "Em Breve"}</p>
-                <p class="sinopse">${movie.sinopse || "Sinopse não disponível"}</p>
-                <div class="sessoes-info">
-                    <p><strong>🎭 Sessões disponíveis:</strong> ${sessoesFilme.length}</p>
-                </div>
-                ${sessoesFilme.length > 0 ?
-                    `<button class="btn-comprar" onclick="abrirModalIngresso('${movie.titulo}')">
-                         🎫 Comprar Ingresso
-                     </button>` :
+                    <img src="${cartazSrc}" alt="${movie.titulo}" class="filme-cartaz">
+                    <h3>${movie.titulo || "Sem título"}</h3>
+                    <p><strong>🏷️ Gênero:</strong> ${movie.genero || "Não informado"}</p>
+                    <p><strong>⏱️ Duração:</strong> ${movie.duracao || "Não informada"} min</p>
+                    <p><strong>📊 Classificação:</strong> ${movie.classificacao || "L"}</p>
+                    <p><strong>📈 Status:</strong> ${movie.status || "Em Breve"}</p>
+                    <p class="sinopse">${movie.sinopse || "Sinopse não disponível"}</p>
+                    <div class="sessoes-info">
+                        <p><strong>🎭 Sessões disponíveis:</strong> ${sessoesFilme.length}</p>
+                    </div>
+                    ${sessoesFilme.length > 0 ?
+                    `<button class="btn-comprar" onclick="abrirModalIngresso('${movie.titulo.replace(/'/g, "\\'")}')">
+                             🎫 Comprar Ingresso
+                         </button>` :
                     '<p class="sem-sessoes">⏳ Aguardando novas sessões</p>'
                 }
-            `;
+                `;
                 catalogo.appendChild(card);
             });
+
+            console.log("✅ Fallback executado com sucesso!");
         }
 
-        /**
-         * Abre modal para compra de ingresso
-         */
-        window.abrirModalIngresso = function(tituloFilme) {
-            const movies = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FILMES)) || [];
-            const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
-
-            // Encontrar filme selecionado
-            filmeSelecionado = movies.find(movie => movie.titulo === tituloFilme);
-            if (!filmeSelecionado) return;
-
-            // Filtrar sessões disponíveis para este filme
-            sessoesDisponiveis = sessoes.filter(sessao =>
-                sessao.filme === tituloFilme &&
-                sessao.status === 'aguardando'
-            );
-
-            // Preencher informações do filme no modal
-            document.getElementById('modalFilmeTitulo').textContent = filmeSelecionado.titulo;
-            document.getElementById('modalFilmeGenero').textContent = `Gênero: ${filmeSelecionado.genero}`;
-            document.getElementById('modalFilmeDuracao').textContent = `Duração: ${filmeSelecionado.duracao} min`;
-            document.getElementById('modalFilmeClassificacao').textContent = `Classificação: ${filmeSelecionado.classificacao}`;
-            document.getElementById('modalCartaz').src = filmeSelecionado.cartaz || 'placeholder.jpg';
-            document.getElementById('modalCartaz').alt = filmeSelecionado.titulo;
-
-            // Carregar lista de sessões
-            carregarListaSessoes();
-
-            // Resetar quantidade
-            quantidadeIngressos = 1;
-            atualizarQuantidade();
-
-            // Abrir modal
-            document.getElementById('modalIngresso').classList.remove('hidden');
-        }
-
-        /**
-         * Carrega lista de sessões disponíveis
-         */
-        function carregarListaSessoes() {
-            const listaSessoes = document.getElementById('listaSessoes');
-            listaSessoes.innerHTML = '';
-
-            if (sessoesDisponiveis.length === 0) {
-                listaSessoes.innerHTML = '<p class="sem-sessoes">Nenhuma sessão disponível</p>';
-                return;
+        // Tentar executar o fallback se necessário
+        setTimeout(() => {
+            const catalogo = document.getElementById("catalogo");
+            if (catalogo && catalogo.children.length === 0) {
+                console.log("⚠️ Catálogo vazio, executando fallback...");
+                carregarCatalogoFallback();
             }
-
-            sessoesDisponiveis.forEach((sessao, index) => {
-                const sessaoElement = document.createElement('div');
-                sessaoElement.className = `sessao-item ${sessaoSelecionada === index ? 'selecionada' : ''}`;
-                sessaoElement.innerHTML = `
-                <div class="sessao-info">
-                    <strong>📍 ${sessao.sala}</strong>
-                    <span>📅 ${formatarDataSessao(sessao.data)}</span>
-                    <span>🕒 ${sessao.horario}</span>
-                    <span>💰 R$ ${sessao.preco.toFixed(2).replace('.', ',')}</span>
-                </div>
-            `;
-                sessaoElement.onclick = () => selecionarSessao(index);
-                listaSessoes.appendChild(sessaoElement);
-            });
-        }
-
-        /**
-         * Seleciona uma sessão
-         */
-        function selecionarSessao(index) {
-            sessaoSelecionada = index;
-            carregarListaSessoes();
-            atualizarResumoCompra();
-        }
-
-        /**
-         * Formata data da sessão
-         */
-        function formatarDataSessao(dataString) {
-            if (!dataString) return "";
-            const [ano, mes, dia] = dataString.split('-');
-            return `${dia}/${mes}/${ano}`;
-        }
-
-        /**
-         * Altera quantidade de ingressos
-         */
-        window.alterarQuantidade = function(alteracao) {
-            const novaQuantidade = quantidadeIngressos + alteracao;
-            if (novaQuantidade >= 1 && novaQuantidade <= 10) {
-                quantidadeIngressos = novaQuantidade;
-                atualizarQuantidade();
-                atualizarResumoCompra();
-            }
-        }
-
-        /**
-         * Atualiza display da quantidade
-         */
-        function atualizarQuantidade() {
-            document.getElementById('quantidade').textContent = quantidadeIngressos;
-        }
-
-        /**
-         * Atualiza resumo da compra
-         */
-        function atualizarResumoCompra() {
-            const resumoCompra = document.getElementById('resumoCompra');
-            const precoTotal = document.getElementById('precoTotal');
-
-            if (sessaoSelecionada === null) {
-                resumoCompra.innerHTML = '<p>Selecione uma sessão para ver o resumo</p>';
-                precoTotal.textContent = 'R$ 0,00';
-                return;
-            }
-
-            const sessao = sessoesDisponiveis[sessaoSelecionada];
-            const total = sessao.preco * quantidadeIngressos;
-
-            resumoCompra.innerHTML = `
-            <div class="resumo-item">
-                <span>Filme:</span>
-                <span>${filmeSelecionado.titulo}</span>
-            </div>
-            <div class="resumo-item">
-                <span>Sessão:</span>
-                <span>${formatarDataSessao(sessao.data)} - ${sessao.horario}</span>
-            </div>
-            <div class="resumo-item">
-                <span>Sala:</span>
-                <span>${sessao.sala}</span>
-            </div>
-            <div class="resumo-item">
-                <span>Ingressos:</span>
-                <span>${quantidadeIngressos} x R$ ${sessao.preco.toFixed(2).replace('.', ',')}</span>
-            </div>
-        `;
-
-            precoTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        }
-
-        /**
-         * Fecha modal de ingresso
-         */
-        window.fecharModalIngresso = function() {
-            document.getElementById('modalIngresso').classList.add('hidden');
-            filmeSelecionado = null;
-            sessaoSelecionada = null;
-            quantidadeIngressos = 1;
-        }
-
-        /**
-         * Finaliza a compra do ingresso
-         */
-        window.finalizarCompra = function() {
-            if (sessaoSelecionada === null) {
-                alert('Por favor, selecione uma sessão!');
-                return;
-            }
-
-            const sessao = sessoesDisponiveis[sessaoSelecionada];
-            const total = sessao.preco * quantidadeIngressos;
-
-            // Simular processamento da compra
-            const compra = {
-                id: Date.now(),
-                filme: filmeSelecionado.titulo,
-                sessao: sessao,
-                quantidade: quantidadeIngressos,
-                total: total,
-                dataCompra: new Date().toISOString(),
-                status: 'confirmada'
-            };
-
-            // Salvar compra no localStorage (em um sistema real, isso seria enviado para um backend)
-            const compras = JSON.parse(localStorage.getItem('compras')) || [];
-            compras.push(compra);
-            localStorage.setItem('compras', JSON.stringify(compras));
-
-            alert(`🎉 Compra realizada com sucesso!\n\n` +
-                `Filme: ${filmeSelecionado.titulo}\n` +
-                `Sessão: ${formatarDataSessao(sessao.data)} - ${sessao.horario}\n` +
-                `Sala: ${sessao.sala}\n` +
-                `Ingressos: ${quantidadeIngressos}\n` +
-                `Total: R$ ${total.toFixed(2).replace('.', ',')}`);
-
-            fecharModalIngresso();
-        }
-
-        // Carregar catálogo inicial
-        carregarCatalogoCliente();
+        }, 1000);
     }
-// ===== PÁGINA: RELATÓRIO DE VENDAS =====
+
+    // ===== PÁGINA: RELATÓRIO DE VENDAS =====
     if (currentPage === "relatorio_vendas.html") {
         console.log("💰 Configurando Relatório de Vendas");
 
@@ -1940,8 +1833,6 @@ document.addEventListener("DOMContentLoaded", function () {
         // INICIALIZAR PÁGINA
         inicializarRelatorio();
     }
-
-
 });
 
 // ===== INICIALIZAÇÃO GLOBAL =====

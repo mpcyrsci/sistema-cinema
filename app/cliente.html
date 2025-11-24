@@ -1,38 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <!-- ===== METADADOS E CONFIGURAÇÕES ===== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎭 Catálogo de Filmes - Sistema de Cinema</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="fade-in">
-<!-- ===== CONTAINER PRINCIPAL ===== -->
 <div class="container">
-    <!-- ===== CABEÇALHO DA PÁGINA ===== -->
     <div class="navigation-buttons">
         <h1 class="page-title" data-page="cliente">🎭 Catálogo de Filmes</h1>
         <button onclick="logout()" class="nav-btn logout">Sair do Sistema</button>
     </div>
 
-    <!-- ===== MENSAGEM DE BOAS-VINDAS ===== -->
     <div class="welcome-message">
         <h2>🎉 Bem-vindo ao nosso catálogo!</h2>
         <p>Confira abaixo todos os filmes disponíveis em nossa programação.</p>
     </div>
 
-    <!-- ===== GRADE DE FILMES ===== -->
     <div class="catalogo" id="catalogo">
-        <!-- ===== ÁREA DINÂMICA ===== -->
-        <!-- Os cards de filmes serão carregados aqui via JavaScript -->
+        <!-- Os cards de filmes serão carregados aqui -->
     </div>
-
-    <!-- ===== MENSAGEM DE ESTADO VAZIO ===== -->
-    <!-- Será exibida via JavaScript quando não houver filmes -->
 </div>
 
-<!-- ===== MODAL DE COMPRA DE INGRESSOS ===== -->
+<!-- Modal de Compra de Ingressos -->
 <div id="modalIngresso" class="modal hidden">
     <div class="modal-content">
         <div class="modal-header">
@@ -41,7 +32,6 @@
         </div>
 
         <div class="modal-body">
-            <!-- Informações do Filme -->
             <div class="filme-info" id="filmeInfo">
                 <img id="modalCartaz" src="" alt="Cartaz do Filme">
                 <div class="filme-detalhes">
@@ -52,15 +42,11 @@
                 </div>
             </div>
 
-            <!-- Seleção de Sessão -->
             <div class="sessao-selecao">
                 <h4>📅 Selecione a Sessão</h4>
-                <div id="listaSessoes" class="lista-sessoes">
-                    <!-- Sessões serão carregadas aqui -->
-                </div>
+                <div id="listaSessoes" class="lista-sessoes"></div>
             </div>
 
-            <!-- Seleção de Quantidade -->
             <div class="quantidade-ingressos">
                 <h4>🎟️ Quantidade de Ingressos</h4>
                 <div class="quantidade-controls">
@@ -71,12 +57,9 @@
                 <p class="preco-total">Total: <span id="precoTotal">R$ 0,00</span></p>
             </div>
 
-            <!-- Informações da Compra -->
             <div class="resumo-compra">
                 <h4>📋 Resumo da Compra</h4>
-                <div id="resumoCompra" class="resumo-detalhes">
-                    <!-- Resumo será preenchido dinamicamente -->
-                </div>
+                <div id="resumoCompra" class="resumo-detalhes"></div>
             </div>
         </div>
 
@@ -87,7 +70,245 @@
     </div>
 </div>
 
-<!-- ===== SCRIPTS DO SISTEMA ===== -->
 <script src="script.js"></script>
+
+<!-- CÓDIGO ESPECÍFICO PARA A PÁGINA DO CLIENTE -->
+<script>
+    // Variáveis globais para controle do modal
+    let filmeSelecionado = null;
+    let sessaoSelecionada = null;
+    let quantidadeIngressos = 1;
+    let sessoesDisponiveis = [];
+
+    // Função principal que carrega o catálogo
+    function carregarCatalogoCliente() {
+        console.log("🎬 Iniciando carregamento do catálogo...");
+
+        const movies = JSON.parse(localStorage.getItem("movies")) || [];
+        const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
+        const catalogo = document.getElementById("catalogo");
+
+        if (!catalogo) {
+            console.log("❌ Elemento catalogo não encontrado");
+            return;
+        }
+
+        catalogo.innerHTML = "";
+
+        if (movies.length === 0) {
+            catalogo.innerHTML = `
+                <div class="empty-state">
+                    <h3>🎭 Nenhum filme disponível</h3>
+                    <p>Volte mais tarde para conferir nossa programação!</p>
+                </div>
+            `;
+            return;
+        }
+
+        console.log(`✅ Carregando ${movies.length} filmes...`);
+
+        movies.forEach(movie => {
+            const sessoesFilme = sessoes.filter(sessao =>
+                sessao.filme === movie.titulo && sessao.status === 'aguardando'
+            );
+
+            const card = document.createElement("div");
+            card.className = "filme-card";
+
+            // Imagem placeholder segura
+            const cartazSrc = movie.cartaz && movie.cartaz.trim() !== '' ?
+                movie.cartaz : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDMwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0NTAiIGZpbGw9IiMzMzMzMzMiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiI+U2VtIEltYWdlbTwvdGV4dD48L3N2Zz4=';
+
+            card.innerHTML = `
+                <img src="${cartazSrc}" alt="${movie.titulo}" class="filme-cartaz" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDMwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0NTAiIGZpbGw9IiMzMzMzMzMiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiI+U2VtIEltYWdlbTwvdGV4dD48L3N2Zz4='">
+                <h3>${movie.titulo || "Sem título"}</h3>
+                <p><strong>🏷️ Gênero:</strong> ${movie.genero || "Não informado"}</p>
+                <p><strong>⏱️ Duração:</strong> ${movie.duracao || "Não informada"} min</p>
+                <p><strong>📊 Classificação:</strong> ${movie.classificacao || "L"}</p>
+                <p><strong>📈 Status:</strong> ${movie.status || "Em Breve"}</p>
+                <p class="sinopse">${movie.sinopse || "Sinopse não disponível"}</p>
+                <div class="sessoes-info">
+                    <p><strong>🎭 Sessões disponíveis:</strong> ${sessoesFilme.length}</p>
+                </div>
+                ${sessoesFilme.length > 0 ?
+                `<button class="btn-comprar" onclick="abrirModalIngresso('${movie.titulo.replace(/'/g, "\\'")}')">
+                         🎫 Comprar Ingresso
+                     </button>` :
+                '<p class="sem-sessoes">⏳ Aguardando novas sessões</p>'
+            }
+            `;
+            catalogo.appendChild(card);
+        });
+
+        console.log("✅ Catálogo carregado com sucesso!");
+    }
+
+    // Funções do Modal
+    window.abrirModalIngresso = function (tituloFilme) {
+        const movies = JSON.parse(localStorage.getItem("movies")) || [];
+        const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
+
+        filmeSelecionado = movies.find(movie => movie.titulo === tituloFilme);
+        if (!filmeSelecionado) return;
+
+        sessoesDisponiveis = sessoes.filter(sessao =>
+            sessao.filme === tituloFilme && sessao.status === 'aguardando'
+        );
+
+        document.getElementById('modalFilmeTitulo').textContent = filmeSelecionado.titulo;
+        document.getElementById('modalFilmeGenero').textContent = `Gênero: ${filmeSelecionado.genero}`;
+        document.getElementById('modalFilmeDuracao').textContent = `Duração: ${filmeSelecionado.duracao} min`;
+        document.getElementById('modalFilmeClassificacao').textContent = `Classificação: ${filmeSelecionado.classificacao}`;
+
+        const cartazImg = document.getElementById('modalCartaz');
+        cartazImg.src = filmeSelecionado.cartaz || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDMwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0NTAiIGZpbGw9IiMzMzMzMzMiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiI+U2VtIEltYWdlbTwvdGV4dD48L3N2Zz4=';
+        cartazImg.alt = filmeSelecionado.titulo;
+
+        carregarListaSessoes();
+        quantidadeIngressos = 1;
+        atualizarQuantidade();
+        atualizarResumoCompra();
+
+        document.getElementById('modalIngresso').classList.remove('hidden');
+    };
+
+    function carregarListaSessoes() {
+        const listaSessoes = document.getElementById('listaSessoes');
+        listaSessoes.innerHTML = '';
+
+        if (sessoesDisponiveis.length === 0) {
+            listaSessoes.innerHTML = '<p class="sem-sessoes">Nenhuma sessão disponível para este filme</p>';
+            return;
+        }
+
+        sessoesDisponiveis.forEach((sessao, index) => {
+            const sessaoElement = document.createElement('div');
+            sessaoElement.className = `sessao-item ${sessaoSelecionada === index ? 'selecionada' : ''}`;
+            sessaoElement.innerHTML = `
+                <div class="sessao-info">
+                    <strong>📍 ${sessao.sala}</strong>
+                    <span>📅 ${formatarDataSessao(sessao.data)}</span>
+                    <span>🕒 ${sessao.horario}</span>
+                    <span>💰 R$ ${typeof sessao.preco === 'number' ? sessao.preco.toFixed(2).replace('.', ',') : '0,00'}</span>
+                </div>
+            `;
+            sessaoElement.onclick = () => selecionarSessao(index);
+            listaSessoes.appendChild(sessaoElement);
+        });
+    }
+
+    function selecionarSessao(index) {
+        sessaoSelecionada = index;
+        carregarListaSessoes();
+        atualizarResumoCompra();
+    }
+
+    function formatarDataSessao(dataString) {
+        if (!dataString) return "Data não informada";
+        try {
+            const [ano, mes, dia] = dataString.split('-');
+            return `${dia}/${mes}/${ano}`;
+        } catch (error) {
+            return dataString;
+        }
+    }
+
+    window.alterarQuantidade = function (alteracao) {
+        const novaQuantidade = quantidadeIngressos + alteracao;
+        if (novaQuantidade >= 1 && novaQuantidade <= 10) {
+            quantidadeIngressos = novaQuantidade;
+            atualizarQuantidade();
+            atualizarResumoCompra();
+        }
+    };
+
+    function atualizarQuantidade() {
+        document.getElementById('quantidade').textContent = quantidadeIngressos;
+    }
+
+    function atualizarResumoCompra() {
+        const resumoCompra = document.getElementById('resumoCompra');
+        const precoTotal = document.getElementById('precoTotal');
+
+        if (sessaoSelecionada === null) {
+            resumoCompra.innerHTML = '<p>Selecione uma sessão para ver o resumo</p>';
+            precoTotal.textContent = 'R$ 0,00';
+            return;
+        }
+
+        const sessao = sessoesDisponiveis[sessaoSelecionada];
+        const preco = typeof sessao.preco === 'number' ? sessao.preco : 0;
+        const total = preco * quantidadeIngressos;
+
+        resumoCompra.innerHTML = `
+            <div class="resumo-item">
+                <span>Filme:</span>
+                <span>${filmeSelecionado.titulo}</span>
+            </div>
+            <div class="resumo-item">
+                <span>Sessão:</span>
+                <span>${formatarDataSessao(sessao.data)} - ${sessao.horario || 'Horário não informado'}</span>
+            </div>
+            <div class="resumo-item">
+                <span>Sala:</span>
+                <span>${sessao.sala || 'Sala não informada'}</span>
+            </div>
+            <div class="resumo-item">
+                <span>Ingressos:</span>
+                <span>${quantidadeIngressos} x R$ ${preco.toFixed(2).replace('.', ',')}</span>
+            </div>
+        `;
+
+        precoTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    }
+
+    window.fecharModalIngresso = function () {
+        document.getElementById('modalIngresso').classList.add('hidden');
+        filmeSelecionado = null;
+        sessaoSelecionada = null;
+        quantidadeIngressos = 1;
+    };
+
+    window.finalizarCompra = function () {
+        if (sessaoSelecionada === null) {
+            alert('Por favor, selecione uma sessão!');
+            return;
+        }
+
+        const sessao = sessoesDisponiveis[sessaoSelecionada];
+        const preco = typeof sessao.preco === 'number' ? sessao.preco : 0;
+        const total = preco * quantidadeIngressos;
+
+        const compra = {
+            id: Date.now(),
+            filme: filmeSelecionado.titulo,
+            sessao: {...sessao, preco: preco},
+            quantidade: quantidadeIngressos,
+            total: total,
+            dataCompra: new Date().toISOString(),
+            status: 'confirmada'
+        };
+
+        const compras = JSON.parse(localStorage.getItem('compras')) || [];
+        compras.push(compra);
+        localStorage.setItem('compras', JSON.stringify(compras));
+
+        alert(`🎉 Compra realizada com sucesso!\n\nFilme: ${filmeSelecionado.titulo}\nSessão: ${formatarDataSessao(sessao.data)} - ${sessao.horario}\nSala: ${sessao.sala}\nIngressos: ${quantidadeIngressos}\nTotal: R$ ${total.toFixed(2).replace('.', ',')}`);
+
+        fecharModalIngresso();
+        carregarCatalogoCliente();
+    };
+
+    // Inicializar a página quando carregar
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log("🚀 Página cliente carregada!");
+        carregarCatalogoCliente();
+    });
+
+    // Fallback: se o DOMContentLoaded já passou, executar imediatamente
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(carregarCatalogoCliente, 100);
+    }
+</script>
 </body>
 </html>
